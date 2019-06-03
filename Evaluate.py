@@ -225,53 +225,44 @@ def evaluation_NER(testresult):
 
 
 
-        for sign in ['解剖部位', '手术','药物', '独立症状','症状描述']:
-            i = 0
-            while i < len(ptag):
 
-                if ptag[i] == '':
-                    # print('ptag', i, '  --'+ttag[i]+'--')
-                    i += 1
+        i = 0
+        while i < len(ptag):
+
+            for sign in ['解剖部位', '手术', '药物', '独立症状', '症状描述']:
+
+                if ptag[i] == '' or ptag[i].__contains__('O'):
+                    break
 
                 elif ptag[i].__contains__(sign+'-S'):
                     total_predict += 1.
                     if ttag[i].__contains__(sign+'-S'):
                         total_predict_right += 1.
-                    i += 1
+                    break
 
                 elif ptag[i].__contains__(sign+'-B'):
                     j = i+1
                     if j == len(ptag):
-                      i += 1
+                      break
+
                     while j < len(ptag):
+
                         if ptag[j].__contains__(sign+'-I'):
-                            j +=1
-                            if j == len(ptag) - 1:
-                                i += 1
+                            j += 1
+
                         elif ptag[j].__contains__(sign+'-E'):
                             total_predict += 1
-                            if ttag[i].__contains__(sign+'-B'):
-                                k = i+1
-                                while k < len(ttag):
-                                    if ttag[k].__contains__(sign+'-I'):
-                                        k += 1
-                                    elif ttag[k].__contains__(sign+'-E'):
-                                        if j ==k:
-                                            total_predict_right +=1
-                                        break
-                            i = j + 1
-                            break
-                        else:
+                            if ttag[i].__contains__(sign+'-B') and ttag[j].__contains__(sign+'-E'):
+                                total_predict_right +=1
+
                             i = j
                             break
+                        else:
+                            i = j-1
+                            break
+                    break
 
-                elif ptag[i].__contains__('other'):
-                    i += 1
-
-                else:
-                    # print('ptag-error-other', i, '  --'+ptag[i]+'--')
-                    # print(ptag)
-                    i += 1
+            i += 1
         # print('total_predict_right = ', total_predict_right)
         # print('total_predict = ', total_predict)
 

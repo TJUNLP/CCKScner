@@ -1,6 +1,7 @@
 
 import jieba, os
 import jieba.posseg
+import json, codecs, operator
 
 def ReadTXTsByLine(filespath):
 
@@ -23,35 +24,46 @@ def ReadTXTsByLine(filespath):
         fw.close()
         f.close()
 
+def calcute_length_of_entity():
 
+    file = './data/subtask1_training_all.txt'
 
+    count = 0
+    dictlen = {}
+
+    for line in codecs.open(file, 'r', encoding='utf-8').readlines():
+        print(line)
+        sent = json.loads(line.rstrip('\r\n').rstrip('\n'))
+        originalText = sent['originalText']
+        entities = sent['entities']
+        for ent in entities:
+            count += 1
+            label_type = ent['label_type']
+            start_pos = ent['start_pos']
+            end_pos = ent['end_pos']
+            print(label_type, start_pos, end_pos, originalText[int(start_pos):int(end_pos)])
+            lens = int(end_pos) - int(start_pos)
+            if lens not in dictlen.keys():
+                dictlen[lens] = 1
+            else:
+                dictlen[lens] = dictlen[lens] + 1
+
+        print(count)
+        lists = sorted(dictlen.items(), key=operator.itemgetter(0), reverse=False)
+        print(lists)
+        '''
+        17653
+        [(1, 3399), (2, 3065), (3, 2806), (4, 2375), (5, 1628), (6, 1154),
+         (7, 692), (8, 503), (9, 329), (10, 300), (11, 223), (12, 195), (13, 131), (14, 117),
+          (15, 90), (16, 86), (17, 62), (18, 85), (19, 52), (20, 50),
+           (21, 29), (22, 23), (23, 32), (24, 25), (25, 25), (26, 25), (27, 16), (28, 15),
+            (29, 8), (30, 12), (31, 13), (32, 9), (33, 7), (34, 9), (35, 6), (36, 12), (37, 5), (38, 7), (39, 2), (40, 6), (41, 2), (42, 2), (43, 4), (44, 1), (46, 1), (47, 1), (48, 3), (49, 3), (51, 1), (53, 3), (55, 1), (56, 1), (92, 1), (125, 1)]
+        '''
 if __name__ == '__main__':
 
-    filespath = '/Users/shengbinjia/Documents/GitHub/UMIdentification/data/'
-    ReadTXTsByLine(filespath)
+    # filespath = '/Users/shengbinjia/Documents/GitHub/UMIdentification/data/'
+    # ReadTXTsByLine(filespath)
 
-    # from sklearn.feature_extraction.text import TfidfVectorizer
-    #
-    # X_train = ['对于 不 熟悉 sklearn 的 同学',
-    #            '通常 都 会 手动 统计 每个 词 的 频率 进行 计算']
-    # X_test = ['不过 其实 sklearn 已经 对 其 进行 了 封装']
-    # vectorizer = TfidfVectorizer(stop_words='english')
-    # vectorizer.fit_transform(X_train).todense()
-    # word = vectorizer.get_feature_names()
-    # print('Features length: ' + str(len(word)))
-    # for j in range(len(word)):
-    #     print(word[j])
-    #
-    # X_train = vectorizer.transform(X_train).toarray()
-    # print(X_train)
-    # for i in range(X_train.shape[0]):
-    #     for j in range(X_train.shape[1]):
-    #         print(i, j, word[j], X_train[i][j])
-    #
-    #
-    #
-    # print('---------------')
-    # X_test = vectorizer.transform(X_test)
-    # print(X_test)
+    calcute_length_of_entity()
 
 

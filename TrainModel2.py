@@ -1030,11 +1030,11 @@ if __name__ == "__main__":
     # modelname = 'creat_Model_BiLSTM_CnnDecoder'
     print(modelname)
 
-    trainfile = "./data/train.txt"
-    testfile = "./data/test.txt"
+    trainfile = "./data2018/train.txt"
+    testfile = "./data2018/test.txt"
 
-    char2v_file = "./data/CCKS18CNER_Char2Vec.txt"
-    word2v_file = "./data/CCKS18CNER_Word2Vec.txt"
+    char2v_file = "./data2018/CCKS18CNER_Char2Vec.txt"
+    word2v_file = "./data2018/CCKS18CNER_Word2Vec.txt"
     datafile = "./data/model/data2.pkl"
     modelfile = "./data/model/model_char_word_CRF21.h5"
     resultdir = "./data/result/"

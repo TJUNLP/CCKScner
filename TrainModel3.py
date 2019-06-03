@@ -1030,17 +1030,17 @@ if __name__ == "__main__":
     # modelname = 'creat_Model_BiLSTM_CnnDecoder'
     print(modelname)
 
-    trainfile = "./data/train.txt"
-    testfile = "./data/test.txt"
+    trainfile = "./data2018/train.txt"
+    testfile = "./data2018/test.txt"
 
-    char2v_file = "./data/CCKS18CNER_Char2Vec.txt"
-    word2v_file = "./data/CCKS18CNER_Word2Vec.txt"
-    datafile = "./data/model/data3.pkl"
-    modelfile = "./data/model/model_char_word_CRF31.h5"
-    resultdir = "./data/result/"
+    char2v_file = "./data2018/CCKS18CNER_Char2Vec.txt"
+    word2v_file = "./data2018/CCKS18CNER_Word2Vec.txt"
+    datafile = "./model/model2018/data3.pkl"
+    modelfile = "./model/model2018/model_char_word_CRF31.h5"
+    resultdir = "./data2018/result/"
 
     batch_size = 32
-    retrain = True
+    retrain = False
     Test = True
     valid = False
     Label = True
@@ -1064,8 +1064,8 @@ if __name__ == "__main__":
         print("test EE model....")
         print(modelfile)
         infer_e2e_model(modelname, datafile, modelfile, resultdir, hidden_dim=200, batch_size=batch_size)
-        print('------> best_model...')
-        infer_e2e_model(modelname, datafile, modelfile+".best_model.h5", resultdir, hidden_dim=200, batch_size=batch_size)
+        # print('------> best_model...')
+        # infer_e2e_model(modelname, datafile, modelfile+".best_model.h5", resultdir, hidden_dim=200, batch_size=batch_size)
 
         print('------> Real test...')
         # CCKStest(testfile, modelname, datafile, modelfile+".best_model.h5", resultdir, hidden_dim=200, batch_size=batch_size)

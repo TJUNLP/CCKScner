@@ -5,7 +5,9 @@ __author__ = 'JIA'
 import numpy as np
 import pickle
 import json
-import math
+import math, codecs, os
+
+
 def load_vec_pkl(fname,vocab,k=300):
     """
     Loads 300x1 word vecs from word2vec
@@ -146,106 +148,49 @@ def make_idx_posi_index(file, max_s):
 
 def make_idx_Char_index(file, max_s, source_vob, target_vob):
 
-    data_s_all=[]
-    data_t_all=[]
-    f = open(file,'r')
+    data_s_all = []
+    data_t_all = []
+
+    f = codecs.open(file, 'r', encoding='utf-8')
     fr = f.readlines()
-    for line in fr:
-        if len(line) <=1:
-            continue
-        sent = json.loads(line.strip('\r\n'))
-        s_sent = sent['tokens']
-        t_sent = sent['tags']
-        data_t = []
-        data_s = []
-        if len(s_sent) > max_s:
-
-            i = 0
-            while i < max_s:
-                if not source_vob.__contains__(s_sent[i]):
-                    data_s.append(source_vob["**UNK**"])
-                else:
-                    data_s.append(source_vob[s_sent[i]])
-                i += 1
-        else:
-
-            i = 0
-            while i < len(s_sent):
-                if not source_vob.__contains__(s_sent[i]):
-                    data_s.append(source_vob["**UNK**"])
-                else:
-                    data_s.append(source_vob[s_sent[i]])
-                i += 1
-            num = max_s - len(s_sent)
-            for inum in range(0, num):
-                data_s.append(0)
-
-        data_s_all.append(data_s)
-
-        if len(t_sent) > max_s:
-            for i in range(0,max_s):
-                targetvec = np.zeros(len(target_vob) + 1)
-                targetvec[target_vob[t_sent[i]]] = 1
-                data_t.append(targetvec)
-        else:
-            for word in t_sent:
-                targetvec = np.zeros(len(target_vob) + 1)
-                targetvec[target_vob[word]] = 1
-                data_t.append(targetvec)
-            while len(data_t) < max_s:
-                targetvec = np.zeros(len(target_vob) + 1)
-                targetvec[0] = 1
-                data_t.append(targetvec)
-
-        data_t_all.append(data_t)
-    f.close()
-    return data_s_all, data_t_all
-
-
-def make_idx_character_index(file, max_s, max_c, source_vob):
-
-    data_s_all=[]
     count = 0
-    f = open(file,'r')
-    fr = f.readlines()
-
-    data_w = []
+    data_t = []
+    data_s = []
     for line in fr:
-
         if line.__len__() <= 1:
             num = max_s - count
             # print('num ', num, 'max_s', max_s, 'count', count)
-
             for inum in range(0, num):
-                data_tmp = []
-                for i in range(0, max_c):
-                    data_tmp.append(0)
-                data_w.append(data_tmp)
+                data_s.append(0)
+                targetvec = np.zeros(len(target_vob) + 1)
+                targetvec[0] = 1
+                data_t.append(targetvec)
+                # data_t.append(0)
             # print(data_s)
             # print(data_t)
-            data_s_all.append(data_w)
-
-            data_w = []
-            count =0
+            data_s_all.append(data_s)
+            data_t_all.append(data_t)
+            data_t = []
+            data_s = []
+            count = 0
             continue
 
-        data_c = []
-        word = line.strip('\r\n').rstrip('\n').split(' ')[0]
+        sent = line.strip('\r\n').rstrip('\n').split('\t')
+        if not source_vob.__contains__(sent[0]):
+            data_s.append(source_vob["**UNK**"])
+        else:
+            data_s.append(source_vob[sent[0]])
 
-        for chr in range(0, min(word.__len__(), max_c)):
-            if not source_vob.__contains__(word[chr]):
-                data_c.append(source_vob["**UNK**"])
-            else:
-                data_c.append(source_vob[word[chr]])
+        targetvec = np.zeros(len(target_vob) + 1)
 
-        num = max_c - word.__len__()
-        for i in range(0, max(num, 0)):
-            data_c.append(0)
-        count +=1
-        data_w.append(data_c)
+        targetvec[target_vob[sent[len(sent)-1]]] = 1
+        data_t.append(targetvec)
+        # data_t.append(target_vob[sent[1]])
+        count += 1
 
     f.close()
-    return data_s_all
+
+    return data_s_all, data_t_all
 
 
 def make_idx_POS_index(file, max_s, source_vob):
@@ -300,39 +245,6 @@ def make_idx_POS_index(file, max_s, source_vob):
     # print(data_t_all)
     return data_s_all
 
-def make_idx_data_index_EE_LSTM3(file, max_s, source_vob):
-
-    data_s_all=[]
-    f = open(file,'r')
-    fr = f.readlines()
-    for line in fr:
-        sent = json.loads(line.strip('\r\n'))
-        s_sent = sent['tokens']
-        data_s = []
-        if len(s_sent) > max_s:
-            i = 0
-            while i < max_s:
-                if not source_vob.__contains__(s_sent[i]):
-                    data_s.append(source_vob["UNK"])
-                else:
-                    data_s.append(source_vob[s_sent[i]])
-                i += 1
-        else:
-            i = 0
-            while i < len(s_sent):
-                if not source_vob.__contains__(s_sent[i]):
-                    data_s.append(source_vob["UNK"])
-                else:
-                    data_s.append(source_vob[s_sent[i]])
-                i += 1
-            num = max_s - len(s_sent)
-            for inum in range(0, num):
-                data_s.append(0)
-
-        data_s_all.append(data_s)
-
-    f.close()
-    return data_s_all
 
 def get_word_index(files):
 
@@ -408,7 +320,7 @@ def get_Feature_index(file):
     return label_vob, label_idex_word
 
 
-def get_Character_index(files, testfile):
+def get_Character_index(files):
 
     source_vob = {}
     target_vob = {}
@@ -417,75 +329,54 @@ def get_Character_index(files, testfile):
     max_s = 0
     tarcount=1
     count = 1
+    num = 0
+    token = 0
 
     for file in files:
-        f = open(file, 'r')
+        f = codecs.open(file, 'r', encoding='utf-8')
         fr = f.readlines()
         for line in fr:
             if line.__len__() <= 1:
+                if num > max_s:
+                    max_s = num
+                # print(max_s, '  ', num)
+                num = 0
                 continue
-            sent = json.loads(line.rstrip('\n').rstrip('\r'))
-            sourc = sent['tokens']
-            for word in sourc:
-                if not source_vob.__contains__(word):
-                    source_vob[word] = count
-                    sourc_idex_word[count] = word
-                    count += 1
-            if sourc.__len__() > max_s:
-                max_s = sourc.__len__()
+            token += 1
 
-            target = sent['tags']
-            if len(sourc) != len(target):
+            num += 1
+            sourc = line.strip('\r\n').rstrip('\n').split('\t')
+            # print(sourc)
+            if not source_vob.__contains__(sourc[0]):
+                source_vob[sourc[0]] = count
+                sourc_idex_word[count] = sourc[0]
+                count += 1
 
-                print(sent['txtid'], len(sourc), len(target), '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-
-            for word in target:
-                if not target_vob.__contains__(word):
-                    target_vob[word] = tarcount
-                    target_idex_word[tarcount] = word
-                    tarcount += 1
+            if not target_vob.__contains__(sourc[len(sourc)-1]):
+                target_vob[sourc[len(sourc)-1]] = tarcount
+                target_idex_word[tarcount] = sourc[len(sourc)-1]
+                tarcount += 1
 
         f.close()
-    if not source_vob.__contains__("**PAD**"):
-        source_vob["**PAD**"] = 0
-        sourc_idex_word[0] = "**PAD**"
 
     if not source_vob.__contains__("**UNK**"):
         source_vob["**UNK**"] = count
         sourc_idex_word[count] = "**UNK**"
         count += 1
 
-    f = open(testfile, 'r')
-    fr = f.readlines()
-    for line in fr:
-        if line.__len__() <= 1:
-            continue
-        sent = json.loads(line.rstrip('\n').rstrip('\r'))
-        sourc = sent['tokens']
-        for word in sourc:
-            if not source_vob.__contains__(word):
-                source_vob[word] = count
-                sourc_idex_word[count] = word
-                count += 1
-        if sourc.__len__() > max_s:
-            max_s = sourc.__len__()
-
-    f.close()
+    if not source_vob.__contains__("**PAD**"):
+        source_vob["**PAD**"] = 0
+        sourc_idex_word[0] = "**PAD**"
 
     return source_vob, sourc_idex_word, target_vob, target_idex_word, max_s
 
 
-def get_data(trainfile, testfile, w2v_file, char2v_file, datafile, w2v_k, char_emd_dim=100, maxlen = 50):
+def get_data(trainfile, testfile, w2v_file, char2v_file, base_datafile, user_datafile, w2v_k, c2v_k=100, data_split=1, maxlen = 50):
     """
     数据处理的入口函数
-    Converts the input files  into the end2end model input formats
-    :param the train tag file: produced by TaggingScheme.py
-    :param the test tag file: produced by TaggingScheme.py
-    :param the word2vec file: Extracted form the word2vec resource
-    :param: the maximum sentence length we want to set
-    :return: tthe end2end model formats data: eelstmfile
-    """
+    Converts the input files  into the model input formats
 
+    """
 
     '''
     pos_vob, pos_idex_word = get_Feature_index([trainfile,devfile,testfile])
@@ -499,108 +390,62 @@ def get_data(trainfile, testfile, w2v_file, char2v_file, datafile, w2v_k, char_e
     print('shape in pos_W:', pos_W.shape)
     '''
 
-    source_char, sourc_idex_char, target_vob, target_idex_word, max_s = get_Character_index({trainfile}, testfile)
+    if not os.path.exists(base_datafile):
 
-    print("source char size: ", source_char.__len__())
-    print("max_s: ", max_s)
-    # print("source char: " + str(sourc_idex_char))
-    print("target vocab size: " + str(target_vob))
-    # print("target vocab size: " + str(target_idex_word))
+        print("Precess base data....")
+        char_vob, idex_2char, target_vob, idex_2target, max_s = get_Character_index({trainfile, testfile})
+        print("source char size: ", char_vob.__len__())
+        print("max_s: ", max_s)
+        print("source char: ", len(idex_2char))
+        print("target vocab size: ", len(target_vob), str(target_vob))
+        print("target vocab size: ", len(idex_2target))
 
-    # character_W, character_k = load_vec_character(source_char,char_emd_dim)
-    character_k, character_W = load_vec_txt(char2v_file, source_char,char_emd_dim)
-    print('character_W shape:',character_W.shape)
-    train_all, target_all = make_idx_Char_index(trainfile, max_s, source_char, target_vob)
+        char_k, char_W = load_vec_txt(char2v_file, char_vob, char_emd_dim)
+        print('character_W shape:', char_W.shape)
 
-    # chartrain = make_idx_character_index(trainfile,max_s, max_c, source_char)
-    # chardev = make_idx_character_index(devfile, max_s, max_c, source_char)
-    # chartest = make_idx_character_index(testfile, max_s, max_c, source_char)
+        print("base dataset created!")
+        out = open(base_datafile, 'wb')
+        pickle.dump([char_vob, target_vob,
+                     idex_2char, idex_2target,
+                     char_W,
+                     char_k,
+                     max_s], out, 0)
+        out.close()
 
-    extra_test_num = int(len(train_all) / 6)
-    test_all, test_target_all = make_idx_Char_index(testfile, max_s, source_char, target_vob)
+    else:
+        print("base data has existed ....")
+        char_vob, target_vob,\
+        idex_2char, idex_2target,\
+        char_W,\
+        char_k,\
+        max_s = pickle.load(open(base_datafile, 'rb'))
+
+
+    train_all, target_all = make_idx_Char_index(trainfile, max_s, char_vob, target_vob)
+
+    extra_test_num = int(len(train_all) / 5)
+    test_all, test_target_all = make_idx_Char_index(testfile, max_s, char_vob, target_vob)
     # test = train_all[:extra_test_num]
     # test_label = target_all[:extra_test_num]
     # train = train_all[extra_test_num:] + test_all[:]
     # train_label = target_all[extra_test_num:] + test_target_all[:]
     # print('extra_test_num', extra_test_num)
 
-
-    # test = train_all[:extra_test_num]
-    # test_label = target_all[:extra_test_num]
-    # train = train_all[extra_test_num:]
-    # train_label = target_all[extra_test_num:]
-    # print('extra_test_num', extra_test_num)
-
-    test = train_all[extra_test_num :extra_test_num*2]
-    test_label = target_all[extra_test_num:extra_test_num*2]
-    train = train_all[:extra_test_num] + train_all[extra_test_num*2:]+ test_all[:]
-    train_label = target_all[:extra_test_num] + target_all[extra_test_num*2:]+ test_target_all[:]
-    print('extra_test_num', extra_test_num)
-
-    # test = train_all[extra_test_num*2 :extra_test_num*3]
-    # test_label = target_all[extra_test_num*2:extra_test_num*3]
-    # train = train_all[:extra_test_num*2] + train_all[extra_test_num*3:]+ test_all[:]
-    # train_label = target_all[:extra_test_num*2] + target_all[extra_test_num*3:]+ test_target_all[:]
-    # print('extra_test_num', extra_test_num)
-
-    # test = train_all[extra_test_num*3 :extra_test_num*4]
-    # test_label = target_all[extra_test_num*3:extra_test_num*4]
-    # train = train_all[:extra_test_num*3] + train_all[extra_test_num*4:]+ test_all[:]
-    # train_label = target_all[:extra_test_num*3] + target_all[extra_test_num*4:]+ test_target_all[:]
-    # print('extra_test_num', extra_test_num)
-
-    # test = train_all[extra_test_num*4 :extra_test_num*5]
-    # test_label = target_all[extra_test_num*4:extra_test_num*5]
-    # train = train_all[:extra_test_num*4] + train_all[extra_test_num*5:]+ test_all[:]
-    # train_label = target_all[:extra_test_num*4] + target_all[extra_test_num*5:]+ test_target_all[:]
-    # print('extra_test_num', extra_test_num)
-
-    # test = train_all[extra_test_num*5:]
-    # test_label = target_all[extra_test_num*5:]
-    # train = train_all[:extra_test_num*5]+ test_all[:]
-    # train_label = target_all[:extra_test_num*5]+ test_target_all[:]
-    # print('extra_test_num', extra_test_num)
+    test = train_all[extra_test_num * (data_split-1):extra_test_num * data_split]
+    test_label = target_all[extra_test_num * (data_split-1):extra_test_num * data_split]
+    train = train_all[:extra_test_num * (data_split-1)] + train_all[extra_test_num * data_split:]
+    train_label = target_all[:extra_test_num * (data_split-1)] + target_all[extra_test_num * data_split:]
+    print('extra_test_num....data_split', extra_test_num, data_split)
 
     print('train len  ', train.__len__(), len(train_label))
     print('test len  ', test.__len__(), len(test_label))
 
 
-    source_vob, sourc_idex_word = get_word_index({trainfile, testfile})
-    print("source vocab size: ", str(len(source_vob)))
-
-    word_k, word_W = load_vec_txt(w2v_file, source_vob, k=w2v_k)
-    print("word2vec loaded!")
-    print("all vocab size: " + str(len(source_vob)))
-    print("source_W  size: " + str(len(word_W)))
-    print('max soure sent lenth is ' + str(max_s))
-
-    # train_all_word = make_idx_word_index(trainfile, max_s, source_vob)
-    # # dev = make_idx_data_index(devfile,max_s,source_vob,target_vob)
-    # # test = make_idx_data_index(testfile, max_s, source_vob, target_vob)
-    # test_word = train_all_word[:extra_test_num]
-    # train_word = train_all_word[extra_test_num:]
-    # print('train len  ', train_word.__len__(), )
-    # print('test len  ', test_word.__len__())
-    #
-    # train_all_posi = make_idx_posi_index(trainfile, max_s)
-    # test_posi = train_all_posi[:extra_test_num]
-    # train_posi = train_all_posi[extra_test_num:]
-    # print('train len  ', train_posi.__len__(), )
-    # print('test len  ', test_posi.__len__())
-    test_word = []
-    train_word = []
-    test_posi = []
-    train_posi = []
 
     print ("dataset created!")
-    out = open(datafile, 'wb')
-    pickle.dump([train, train_label, test, test_label,
-                 target_vob, target_idex_word, max_s,
-                 source_char, character_W, sourc_idex_char, character_k,
-                 train_word, test_word,
-                 source_vob, word_W, sourc_idex_word, word_k,
-                 train_posi, test_posi
-                 ], out, 0)
+    out = open(user_datafile, 'wb')
+    pickle.dump([train, train_label,
+                 test, test_label], out, 0)
     out.close()
 
 
@@ -618,59 +463,3 @@ if __name__=="__main__":
     datafile = "./data/model/data.pkl"
     modelfile = "./data/model/model.pkl"
     resultdir = "./data/result/"
-
-    source_char, sourc_idex_char, target_vob, target_idex_word, max_s = get_Character_index({trainfile}, testfile)
-
-    print("source char size: ", source_char.__len__())
-    print("max_s: ", max_s)
-    print("source char: " + str(sourc_idex_char))
-    print("target vocab size: " + str(target_vob))
-    print("target vocab size: " + str(target_idex_word))
-
-    # character_W, character_k = load_vec_character(source_char,char_emd_dim)
-    character_k, character_W = load_vec_txt(char2v_file, source_char,char_emd_dim)
-    print('character_W shape:',character_W.shape)
-    train_all, target_all = make_idx_Char_index(trainfile, max_s, source_char, target_vob)
-    # chartrain = make_idx_character_index(trainfile,max_s, max_c, source_char)
-    # chardev = make_idx_character_index(devfile, max_s, max_c, source_char)
-    # chartest = make_idx_character_index(testfile, max_s, max_c, source_char)
-
-    extra_test_num = int(len(train_all) / 6)
-    # test = train_all[:extra_test_num]
-    # test_label = target_all[:extra_test_num]
-    # train = train_all[extra_test_num:]
-    # train_label = target_all[extra_test_num:]
-    # print('extra_test_num', extra_test_num)
-
-    test = train_all[extra_test_num :extra_test_num*2]
-    test_label = target_all[extra_test_num:extra_test_num*2]
-    train = train_all[:extra_test_num] + train_all[extra_test_num*2:]
-    train_label = target_all[:extra_test_num] + target_all[extra_test_num*2:]
-    print('extra_test_num', extra_test_num)
-
-    print('train len  ', train.__len__(), len(train_label))
-    print('test len  ', test.__len__(), len(test_label))
-
-
-    source_vob, sourc_idex_word = get_word_index({trainfile, testfile})
-    print("source vocab size: ", str(len(source_vob)))
-
-    word_k, word_W = load_vec_txt(w2v_file, source_vob, k=100)
-    print("word2vec loaded!")
-    print("all vocab size: " + str(len(source_vob)))
-    print("source_W  size: " + str(len(word_W)))
-    print('max soure sent lenth is ' + str(max_s))
-
-    train_all_word = make_idx_word_index(trainfile, max_s, source_vob)
-    # dev = make_idx_data_index(devfile,max_s,source_vob,target_vob)
-    # test = make_idx_data_index(testfile, max_s, source_vob, target_vob)
-    test_word = train_all_word[:extra_test_num]
-    train_word = train_all_word[extra_test_num:]
-    print('train len  ', train_word.__len__(), )
-    print('test len  ', test_word.__len__())
-
-    train_all_posi = make_idx_posi_index(trainfile, max_s)
-    test_posi = train_all_posi[:extra_test_num]
-    train_posi = train_all_posi[extra_test_num:]
-    print('train len  ', train_posi.__len__(), )
-    print('test len  ', test_posi.__len__())
