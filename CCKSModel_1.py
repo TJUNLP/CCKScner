@@ -226,7 +226,7 @@ if __name__ == "__main__":
     inputs_test_x = [testx_char]
     inputs_test_y = [testy]
 
-    for inum in range(0, 1):
+    for inum in range(0, 3):
 
         nnmodel = None
         nnmodel = SelectModel(modelname,

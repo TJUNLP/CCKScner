@@ -82,13 +82,13 @@ def trainset_json2conll():
             label_type = ent['label_type']
             start_pos = int(ent['start_pos'])
             end_pos = int(ent['end_pos'])
-            if end_pos- start_pos == 1:
+            if end_pos - start_pos == 1:
                 taglist[start_pos] = label_type + '-S'
             else:
                 taglist[start_pos] = label_type + '-B'
                 for i_pos in range(start_pos+1, end_pos):
                     taglist[i_pos] = label_type + '-I'
-            taglist[end_pos-1] = label_type + '-E'
+                taglist[end_pos-1] = label_type + '-E'
 
         for ci, chara in enumerate(originalText):
 
@@ -113,3 +113,16 @@ if __name__ == '__main__':
 
 
     # [('影像检查', 969), ('手术', 1029), ('实验室检验', 1195), ('药物', 1822), ('疾病和诊断', 4212), ('解剖部位', 8426)]
+    '''
+    22 {'O': 1, 
+    '疾病和诊断-B': 2, '疾病和诊断-I': 3, '疾病和诊断-E': 4, 
+    '手术-B': 5, '手术-I': 6, '手术-E': 7, 
+    '解剖部位-B': 8, '解剖部位-I': 9, '解剖部位-E': 10, 
+    '药物-B': 11, '药物-I': 12, '药物-E': 13, 
+    '解剖部位-S': 14, 
+    '影像检查-B': 15, '影像检查-I': 16, '影像检查-E': 17, 
+    '实验室检验-B': 18, '实验室检验-I': 19, '实验室检验-E': 20, 
+    '实验室检验-S': 21, 
+    '疾病和诊断-S': 22}
+
+    '''
