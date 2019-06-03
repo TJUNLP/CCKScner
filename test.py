@@ -2,6 +2,7 @@
 import jieba, os
 import jieba.posseg
 import json, codecs, operator
+import numpy as np
 
 def ReadTXTsByLine(filespath):
 
@@ -59,11 +60,56 @@ def calcute_length_of_entity():
            (21, 29), (22, 23), (23, 32), (24, 25), (25, 25), (26, 25), (27, 16), (28, 15),
             (29, 8), (30, 12), (31, 13), (32, 9), (33, 7), (34, 9), (35, 6), (36, 12), (37, 5), (38, 7), (39, 2), (40, 6), (41, 2), (42, 2), (43, 4), (44, 1), (46, 1), (47, 1), (48, 3), (49, 3), (51, 1), (53, 3), (55, 1), (56, 1), (92, 1), (125, 1)]
         '''
+
+
+def trainset_json2conll():
+
+    file = './data/subtask1_training_all.txt'
+    file2 = './data/subtask1_training_all.conll.txt'
+    count = 0
+    dictlen = {}
+    fr = codecs.open(file, 'r', encoding='utf-8')
+    fw = codecs.open(file2, 'w', encoding='utf-8')
+    for line in fr.readlines():
+        print(line)
+        sent = json.loads(line.rstrip('\r\n').rstrip('\n'))
+        originalText = sent['originalText']
+        entities = sent['entities']
+        taglist = ['O' for col in range(len(originalText))]
+
+        for ent in entities:
+            count += 1
+            label_type = ent['label_type']
+            start_pos = int(ent['start_pos'])
+            end_pos = int(ent['end_pos'])
+            if end_pos- start_pos == 1:
+                taglist[start_pos] = label_type + '-S'
+            else:
+                taglist[start_pos] = label_type + '-B'
+                for i_pos in range(start_pos+1, end_pos):
+                    taglist[i_pos] = label_type + '-I'
+            taglist[end_pos-1] = label_type + '-E'
+
+        for ci, chara in enumerate(originalText):
+
+            fw.write(chara + '\t' + taglist[ci] + '\n')
+            if chara == '。':
+                fw.write('\n')
+                continue
+
+        print(count)
+
+    fr.close()
+    fw.close()
+
+
 if __name__ == '__main__':
 
     # filespath = '/Users/shengbinjia/Documents/GitHub/UMIdentification/data/'
     # ReadTXTsByLine(filespath)
 
-    calcute_length_of_entity()
+    # calcute_length_of_entity()
+    trainset_json2conll()
 
 
+    # [('影像检查', 969), ('手术', 1029), ('实验室检验', 1195), ('药物', 1822), ('疾病和诊断', 4212), ('解剖部位', 8426)]

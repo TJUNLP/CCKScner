@@ -6,9 +6,9 @@ import os.path
 import numpy as np
 import matplotlib.pyplot as plt
 from keras import backend as K
-from ProcessData_posiembed import get_data
+from PrecessData import get_data
 from Evaluate import evaluation_NER
-from Evaluate import evaluation_NER_error
+
 from keras.layers import Flatten,Lambda,Conv2D
 from keras.layers.core import Dropout, Activation, Permute, RepeatVector
 from keras.layers.merge import concatenate, Concatenate, multiply, Dot
@@ -179,12 +179,12 @@ if __name__ == "__main__":
     resultdir = "./data/result/"
 
 
-    trainfile = './data/'
-    testfile = './data/'
-    char2v_file = "./data/preEmbedding/"
+    trainfile = './data/subtask1_training_all.conll.txt'
+    testfile = ''
+    char2v_file = "./data/preEmbedding/CCKS2019_onlychar_Char2Vec.txt"
     word2v_file = " "
     base_datafile = './model/cckscner.base.data.pkl'
-    dataname = 'cckscner.user.data.onlyc2v'#!!!!!!!!!!!!!.2
+    dataname = 'cckscner.user.data.onlyc2v'
     user_datafile = "./model/" + dataname + ".pkl"
     batch_size = 8
 
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     inputs_test_x = [testx_char]
     inputs_test_y = [testy]
 
-    for inum in range(0, 5):
+    for inum in range(0, 1):
 
         nnmodel = None
         nnmodel = SelectModel(modelname,
@@ -237,7 +237,7 @@ if __name__ == "__main__":
                               char_k=char_k,
                               batch_size=batch_size)
 
-        modelfile = "./model/" + dataname + '__' + modelname + "_" + str(inum) + ".h5"
+        modelfile = "./model/" + dataname + '__' + modelname + "_" + str(data_split) + '-' + str(inum) + ".h5"
 
         if not os.path.exists(modelfile):
             print("Training model....")

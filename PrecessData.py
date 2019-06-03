@@ -371,7 +371,7 @@ def get_Character_index(files):
     return source_vob, sourc_idex_word, target_vob, target_idex_word, max_s
 
 
-def get_data(trainfile, testfile, w2v_file, char2v_file, base_datafile, user_datafile, w2v_k, c2v_k=100, data_split=1, maxlen = 50):
+def get_data(trainfile, testfile, w2v_file, c2v_file, base_datafile, user_datafile, w2v_k, c2v_k=100, data_split=1, maxlen = 50):
     """
     数据处理的入口函数
     Converts the input files  into the model input formats
@@ -393,14 +393,14 @@ def get_data(trainfile, testfile, w2v_file, char2v_file, base_datafile, user_dat
     if not os.path.exists(base_datafile):
 
         print("Precess base data....")
-        char_vob, idex_2char, target_vob, idex_2target, max_s = get_Character_index({trainfile, testfile})
+        char_vob, idex_2char, target_vob, idex_2target, max_s = get_Character_index({trainfile})
         print("source char size: ", char_vob.__len__())
         print("max_s: ", max_s)
         print("source char: ", len(idex_2char))
         print("target vocab size: ", len(target_vob), str(target_vob))
         print("target vocab size: ", len(idex_2target))
 
-        char_k, char_W = load_vec_txt(char2v_file, char_vob, char_emd_dim)
+        char_k, char_W = load_vec_txt(c2v_file, char_vob, c2v_k)
         print('character_W shape:', char_W.shape)
 
         print("base dataset created!")
@@ -424,7 +424,7 @@ def get_data(trainfile, testfile, w2v_file, char2v_file, base_datafile, user_dat
     train_all, target_all = make_idx_Char_index(trainfile, max_s, char_vob, target_vob)
 
     extra_test_num = int(len(train_all) / 5)
-    test_all, test_target_all = make_idx_Char_index(testfile, max_s, char_vob, target_vob)
+    # test_all, test_target_all = make_idx_Char_index(testfile, max_s, char_vob, target_vob)
     # test = train_all[:extra_test_num]
     # test_label = target_all[:extra_test_num]
     # train = train_all[extra_test_num:] + test_all[:]
@@ -452,14 +452,3 @@ def get_data(trainfile, testfile, w2v_file, char2v_file, base_datafile, user_dat
 if __name__=="__main__":
     print(20*2)
 
-    alpha = 10
-    maxlen = 50
-    trainfile = "./data/train.txt"
-    testfile = "./data/test.txt"
-    w2v_file = "./data/CCKS18CNER_Word2Vec.txt"
-    char2v_file = "./data/CCKS18CNER_Char2Vec.txt"
-    char_emd_dim = 100
-
-    datafile = "./data/model/data.pkl"
-    modelfile = "./data/model/model.pkl"
-    resultdir = "./data/result/"
