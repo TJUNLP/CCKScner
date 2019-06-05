@@ -125,7 +125,8 @@ def evaluation_NER(testresult):
     total_predict = 0.
     total_right = 0.
 
-    for sent in testresult:
+    for si, sent in enumerate(testresult):
+        print(si)
         ptag = sent[0]
         ttag = sent[1]
         # print('ptag--'+str(ptag))
