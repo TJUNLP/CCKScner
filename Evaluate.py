@@ -141,7 +141,7 @@ def evaluation_NER(testresult):
             count  = 0
             for sign in ['影像检查', '手术', '实验室检验', '药物', '疾病和诊断', '解剖部位']:
 
-                if ttag[i] == '' or ttag[i].__contains__('O'):
+                if ttag[i] == '' or ttag[i] == 'O':
                     i += 1
                     break
 
@@ -167,11 +167,10 @@ def evaluation_NER(testresult):
                     break
 
                 else:
-                    print('error-other', i, '  --'+ttag[i]+'--')
-                    print(ttag)
                     count += 1
-                    if count < 6:
-                        break
+                    if count >= 6:
+                        print('error-other', i, '  --' + ttag[i] + '--')
+                        print(ttag)
         # print('total_right = ', total_right)
 
         i = 0
@@ -179,7 +178,7 @@ def evaluation_NER(testresult):
 
             for sign in ['影像检查', '手术', '实验室检验', '药物', '疾病和诊断', '解剖部位']:
 
-                if ptag[i] == '' or ptag[i].__contains__('O'):
+                if ptag[i] == '' or ptag[i] == 'O':
                     break
 
                 elif ptag[i].__contains__(sign+'-S'):
@@ -201,7 +200,7 @@ def evaluation_NER(testresult):
                         elif ptag[j].__contains__(sign+'-E'):
                             total_predict += 1
                             if ttag[i].__contains__(sign+'-B') and ttag[j].__contains__(sign+'-E'):
-                                total_predict_right +=1
+                                total_predict_right += 1
 
                             i = j
                             break
