@@ -126,7 +126,7 @@ def evaluation_NER(testresult):
     total_right = 0.
 
     for si, sent in enumerate(testresult):
-        print(si)
+
         ptag = sent[0]
         ttag = sent[1]
         # print('ptag--'+str(ptag))
@@ -164,6 +164,7 @@ def evaluation_NER(testresult):
                             i = j + 1
                             break
                         else:
+                            print(si)
                             print(ttag[i], i)
                     break
 
@@ -172,6 +173,7 @@ def evaluation_NER(testresult):
                     if count >= 6:
                         print('error-other', i, '  --' + ttag[i] + '--')
                         print(ttag)
+                        print(si)
         # print('total_right = ', total_right)
 
         i = 0
