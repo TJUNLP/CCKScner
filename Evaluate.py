@@ -138,98 +138,43 @@ def evaluation_NER(testresult):
         # '症状描述-B': 16, '症状描述-E': 17, '症状描述-I': 19, '症状描述-S': 15,}
         i = 0
         while i < len(ttag):
-            # print('ttag['+str(i)+'] is-'+ttag[i]+'-')
 
-            if ttag[i] == '':
-                # print( i, '  --', ttag[i], '--')
-                i += 1
+            for sign in ['影像检查', '手术', '实验室检验', '药物', '疾病和诊断', '解剖部位']:
 
-            elif ttag[i].__contains__('解剖部位-S') \
-                    or ttag[i].__contains__('手术-S') \
-                    or ttag[i].__contains__('独立症状-S') \
-                    or ttag[i].__contains__('症状描述-S'):
+                if ttag[i] == '' or ttag[i].__contains__('O'):
+                    i += 1
+                    break
 
-                total_right += 1.
-                # print(i, ttag[i], 'total_right = ', total_right)
-                i += 1
+                elif ttag[i].__contains__(sign + '-S'):
 
-            elif ttag[i].__contains__('解剖部位-B'):
-                j = i+1
-                while j < len(ttag):
-                    if ttag[j].__contains__('解剖部位-I'):
-                        j += 1
-                    elif ttag[j].__contains__('解剖部位-E'):
-                        total_right += 1.
-                        # print(i, ttag[i], 'total_right = ', total_right)
-                        i = j + 1
-                        break
-                    else:
-                        print('解剖部位-LOC', i)
-            elif ttag[i].__contains__('手术-B'):
-                j = i + 1
-                while j < len(ttag):
-                    if ttag[j].__contains__('手术-I'):
-                        j += 1
-                    elif ttag[j].__contains__('手术-E'):
-                        total_right += 1.
-                        # print(i, ttag[i], 'total_right = ', total_right)
-                        i = j + 1
-                        break
-                    else:
-                        print('error-手术', ttag)
-            elif ttag[i].__contains__('药物-B'):
-                j = i + 1
-                while j < len(ttag):
-                    if ttag[j].__contains__('药物-I'):
-                        j += 1
-                    elif ttag[j].__contains__('药物-E'):
-                        total_right += 1.
-                        # print(i, ttag[i], 'total_right = ', total_right)
-                        i = j + 1
-                        break
-                    else:
-                        print('error-药物', i)
-            elif ttag[i].__contains__('独立症状-B'):
-                j = i + 1
-                while j < len(ttag):
-                    if ttag[j].__contains__('独立症状-I'):
-                        j += 1
-                    elif ttag[j].__contains__('独立症状-E'):
-                        total_right += 1.
-                        # print(i, ttag[i], 'total_right = ', total_right)
-                        i = j + 1
-                        break
-                    else:
-                        print('error-独立症状', i)
-            elif ttag[i].__contains__('症状描述-B'):
-                j = i + 1
-                while j < len(ttag):
-                    if ttag[j].__contains__('症状描述-I'):
-                        j += 1
-                    elif ttag[j].__contains__('症状描述-E'):
-                        total_right += 1.
-                        # print(i, ttag[i], 'total_right = ', total_right)
-                        i = j + 1
-                        break
-                    else:
-                        print('error-症状描述', i)
+                    total_right += 1.
+                    # print(i, ttag[i], 'total_right = ', total_right)
+                    i += 1
+                    break
 
-            elif ttag[i].__contains__('other'):
-                i += 1
+                elif ttag[i].__contains__(sign + '-B'):
+                    j = i+1
+                    while j < len(ttag):
+                        if ttag[j].__contains__(sign + '-I'):
+                            j += 1
+                        elif ttag[j].__contains__(sign + '-E'):
+                            total_right += 1.
+                            # print(i, ttag[i], 'total_right = ', total_right)
+                            i = j + 1
+                            break
+                        else:
+                            print(ttag[i], i)
+                    break
 
-            else:
-                print('error-other', i, '  --'+ttag[i]+'--')
-                print(ttag)
+                else:
+                    print('error-other', i, '  --'+ttag[i]+'--')
+                    print(ttag)
         # print('total_right = ', total_right)
-
-
-
-
 
         i = 0
         while i < len(ptag):
 
-            for sign in ['解剖部位', '手术', '药物', '独立症状', '症状描述']:
+            for sign in ['影像检查', '手术', '实验室检验', '药物', '疾病和诊断', '解剖部位']:
 
                 if ptag[i] == '' or ptag[i].__contains__('O'):
                     break
@@ -608,14 +553,6 @@ def evaluavtion_rel(testresult):
 
     return P, R, F, total_predict_right, total_predict, total_right
 
-
-
-# len(testresult)--=  81986
-# total_predict_right--=  80990.0
-# total_predict--=  81089.0
-# total_right--= 81986.0
-# 0.9987791192393543 0.9878515844168516 0.993285298175686
-# P=  0.9987791192393543   R=  0.9878515844168516   F=  0.993285298175686
 
 def evaluavtion_triple(testresult):
     total_predict_right = 0.
