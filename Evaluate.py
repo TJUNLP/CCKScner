@@ -138,7 +138,7 @@ def evaluation_NER(testresult):
         # '症状描述-B': 16, '症状描述-E': 17, '症状描述-I': 19, '症状描述-S': 15,}
         i = 0
         while i < len(ttag):
-
+            count  = 0
             for sign in ['影像检查', '手术', '实验室检验', '药物', '疾病和诊断', '解剖部位']:
 
                 if ttag[i] == '' or ttag[i].__contains__('O'):
@@ -169,6 +169,9 @@ def evaluation_NER(testresult):
                 else:
                     print('error-other', i, '  --'+ttag[i]+'--')
                     print(ttag)
+                    count += 1
+                    if count < 6:
+                        break
         # print('total_right = ', total_right)
 
         i = 0
