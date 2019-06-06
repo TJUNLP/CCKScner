@@ -128,7 +128,7 @@ def train_e2e_model(nn_model, modelfile, inputs_train_x, inputs_train_y, npoches
         nn_model.load_weights(modelfile)
 
     early_stopping = EarlyStopping(monitor='val_loss', patience=10)
-    checkpointer = ModelCheckpoint(filepath=modelfile+".best_model.h5", monitor='val_crf_viterbi_accuracy', verbose=0, save_best_only=True, save_weights_only=True)
+    checkpointer = ModelCheckpoint(filepath=modelfile+".best_model.h5", monitor='val_acc', verbose=0, save_best_only=True, save_weights_only=True)
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=8, min_lr=0.00001)
 
     nn_model.fit(x=inputs_train_x,
