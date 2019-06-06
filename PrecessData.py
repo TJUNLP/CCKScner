@@ -158,16 +158,14 @@ def make_idx_Char_index(file, max_s, source_vob, target_vob):
     data_s = []
     for line in fr:
         if line.__len__() <= 1:
-            num = max_s - count
-            # print('num ', num, 'max_s', max_s, 'count', count)
-            for inum in range(0, num):
-                data_s.append(0)
+
+            data_s = data_s[0:min(len(data_s), max_s)] + [0] * max(0, max_s - len(data_s))
+            data_t = data_t[0:min(len(data_s), max_s)]
+            for inum in range(0, max_s - len(data_t)):
                 targetvec = np.zeros(len(target_vob) + 1)
                 targetvec[0] = 1
                 data_t.append(targetvec)
-                # data_t.append(0)
-            # print(data_s)
-            # print(data_t)
+
             data_s_all.append(data_s)
             data_t_all.append(data_t)
             data_t = []
@@ -395,6 +393,8 @@ def get_data(trainfile, testfile, w2v_file, c2v_file, base_datafile, user_datafi
         print("Precess base data....")
         char_vob, idex_2char, target_vob, idex_2target, max_s = get_Character_index({trainfile})
         print("source char size: ", char_vob.__len__())
+        print("max_s: ", max_s)
+        max_s = 136
         print("max_s: ", max_s)
         print("source char: ", len(idex_2char))
         print("target vocab size: ", len(target_vob), str(target_vob))

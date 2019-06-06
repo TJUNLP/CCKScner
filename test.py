@@ -33,7 +33,7 @@ def calcute_length_of_entity():
     dictlen = {}
 
     for line in codecs.open(file, 'r', encoding='utf-8').readlines():
-        print(line)
+        # print(line)
         sent = json.loads(line.rstrip('\r\n').rstrip('\n'))
         originalText = sent['originalText']
         entities = sent['entities']
@@ -42,16 +42,21 @@ def calcute_length_of_entity():
             label_type = ent['label_type']
             start_pos = ent['start_pos']
             end_pos = ent['end_pos']
-            print(label_type, start_pos, end_pos, originalText[int(start_pos):int(end_pos)])
+            # print(label_type, start_pos, end_pos, originalText[int(start_pos):int(end_pos)])
+            if ' ' in originalText[int(start_pos):int(end_pos)]:
+
+                print('*************-' + originalText[int(start_pos):int(end_pos)])
+                if originalText[int(start_pos)-1] == '。':
+                    print('!!!!!!!!!!!!!!!')
             lens = int(end_pos) - int(start_pos)
             if lens not in dictlen.keys():
                 dictlen[lens] = 1
             else:
                 dictlen[lens] = dictlen[lens] + 1
 
-        print(count)
+        # print(count)
         lists = sorted(dictlen.items(), key=operator.itemgetter(0), reverse=False)
-        print(lists)
+        # print(lists)
         '''
         17653
         [(1, 3399), (2, 3065), (3, 2806), (4, 2375), (5, 1628), (6, 1154),
@@ -65,11 +70,12 @@ def calcute_length_of_entity():
 def trainset_json2conll():
 
     file = './data/subtask1_training_all.txt'
-    file2 = './data/subtask1_training_all.conll.txt'
+    # file2 = './data/subtask1_training_all.conll.txt'
     count = 0
+    ssss = 0
     dictlen = {}
     fr = codecs.open(file, 'r', encoding='utf-8')
-    fw = codecs.open(file2, 'w', encoding='utf-8')
+    # fw = codecs.open(file2, 'w', encoding='utf-8')
     for line in fr.readlines():
         print(line)
         sent = json.loads(line.rstrip('\r\n').rstrip('\n'))
@@ -78,7 +84,7 @@ def trainset_json2conll():
         taglist = ['O' for col in range(len(originalText))]
 
         for ent in entities:
-            count += 1
+
             label_type = ent['label_type']
             start_pos = int(ent['start_pos'])
             end_pos = int(ent['end_pos'])
@@ -90,17 +96,32 @@ def trainset_json2conll():
                     taglist[i_pos] = label_type + '-I'
                 taglist[end_pos-1] = label_type + '-E'
 
+        sublens = 0
         for ci, chara in enumerate(originalText):
 
-            fw.write(chara + '\t' + taglist[ci] + '\n')
+            # fw.write(chara + '\t' + taglist[ci] + '\n')
+            sublens += 1
             if chara == '。':
-                fw.write('\n')
-                continue
+                # fw.write('\n')
+                if sublens in dictlen.keys():
+                    dictlen[sublens] += 1
+                else:
+                    dictlen[sublens] = 1
+                # if sublens >136 :
+                    # print(originalText)
+                sublens = 0
 
-        print(count)
+
+    print(count)
+    lists = sorted(dictlen.items(), key=operator.itemgetter(0), reverse=False)
+    amount = 0
+    for d in lists:
+        print(d)
+        amount += d[1]
+        print(amount, amount/7750)
 
     fr.close()
-    fw.close()
+    # fw.close()
 
 
 if __name__ == '__main__':
