@@ -56,7 +56,7 @@ def test_model(nn_model, inputs_test_x, test_y, index2word, resultfile ='', batc
 
         testresult.append(result)
         # print(result.shape)
-    # print('count-----------',count)
+    print('count-----------', len(result))
     # pickle.dump(testresult, open(resultfile, 'w'))
     #  P, R, F = evaluavtion_triple(testresult)
 
