@@ -52,33 +52,35 @@ def GetVariousList(file):
     print(len(OpenCharList))
     print(len(OnlyEntCharList))
 
-    fw = codecs.open(file + '.DoubleEmd.txt', 'w', encoding='utf-8')
-    fr = codecs.open(file, 'r', encoding='utf-8')
-    for line in fr.readlines():
-
-        sent = json.loads(line.rstrip('\r\n').rstrip('\n'))
-        originalText = sent['originalText']
-        entities = sent['entities']
-        tmpposilist = []
-        seqsent = ''
-        for ent in entities:
-
-            label_type = ent['label_type']
-            start_pos = int(ent['start_pos'])
-            end_pos = int(ent['end_pos'])
-            for ch in range(start_pos, end_pos):
-
-                tmpposilist.append(ch)
-        for ti, tchar in enumerate(originalText):
-            if ti not in tmpposilist:
-                seqsent += ' ' + tchar + '_0'
-            else:
-                seqsent += ' ' + tchar + '_1'
-        # print(seqsent)
-        fw.write(seqsent[1:] + '\n')
-
     fr.close()
-    fw.close()
+
+    # fw = codecs.open(file + '.DoubleEmd.txt', 'w', encoding='utf-8')
+    # fr = codecs.open(file, 'r', encoding='utf-8')
+    # for line in fr.readlines():
+    #
+    #     sent = json.loads(line.rstrip('\r\n').rstrip('\n'))
+    #     originalText = sent['originalText']
+    #     entities = sent['entities']
+    #     tmpposilist = []
+    #     seqsent = ''
+    #     for ent in entities:
+    #
+    #         label_type = ent['label_type']
+    #         start_pos = int(ent['start_pos'])
+    #         end_pos = int(ent['end_pos'])
+    #         for ch in range(start_pos, end_pos):
+    #
+    #             tmpposilist.append(ch)
+    #     for ti, tchar in enumerate(originalText):
+    #         if ti not in tmpposilist:
+    #             seqsent += ' ' + tchar + '_0'
+    #         else:
+    #             seqsent += ' ' + tchar + '_1'
+    #     # print(seqsent)
+    #     fw.write(seqsent[1:] + '\n')
+    #
+    # fr.close()
+    # fw.close()
 
     return OnlyEntCharList, OpenCharList
 
@@ -87,7 +89,7 @@ def AddDE2Conll(file, conllfile):
 
     OnlyEntCharList, OpenCharList = GetVariousList(file)
     fr = codecs.open(conllfile, 'r', encoding='utf-8')
-    fw = codecs.open(conllfile+'.DoubleEmbed.txt', 'w', encoding='utf-8')
+    fw = codecs.open(conllfile+'.DoubleEmd.txt', 'w', encoding='utf-8')
     for line in fr.readlines():
         lsp = line.rstrip('\n').split('\t')
         if len(lsp) < 2:
@@ -98,11 +100,9 @@ def AddDE2Conll(file, conllfile):
         elif lsp[0] in OpenCharList:
             chi = lsp[0] + '_0'
         else:
-            if lsp[1] == 'O':
-                chi = lsp[0] + '_0'
-            else:
-                chi = lsp[0] + '_1'
-        fw.write(line.rstrip('\n') + '\t' + chi + '\n')
+            chi = lsp[0] + '_2'
+
+        fw.write(lsp[0] + '\t' + chi + '\t' + lsp[1] + '\n')
     fr.close()
     fw.close()
 

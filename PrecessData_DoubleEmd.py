@@ -23,7 +23,7 @@ def load_vec_pkl(fname,vocab,k=300):
 
 
 def load_vec_txt(fname, vocab, k=100):
-    f = codecs.open(fname, 'r', encoding='utf-8')
+    f = open(fname)
     w2v={}
     W = np.zeros(shape=(vocab.__len__() + 1, k))
     unknowtoken = 0
@@ -46,50 +46,6 @@ def load_vec_txt(fname, vocab, k=100):
             W[vocab[word]] = w2v[word]
 
     print('UnKnown tokens in w2v', unknowtoken)
-    return k, W
-
-
-def load_vec_txt_DoubleEmd(fname, vocab, k=100):
-
-    f = codecs.open(fname, 'r', encoding='utf-8')
-    w2v = {}
-    W = np.zeros(shape=(vocab.__len__() + 1, k))
-    unknowtoken = 0
-    for line in f.readlines():
-        if len(line) < k:
-            continue
-        values = line.split()
-        word = values[0]
-        coefs = np.asarray(values[1:], dtype='float32')
-        w2v[word] = coefs
-    f.close()
-
-    w2v["**UNK**"] = np.random.uniform(-1*math.sqrt(3/k), math.sqrt(3/k), k)
-    count0 = 0
-    count1 = 0
-    for word in vocab:
-        if word + '_0' in w2v.keys() and word + '_1' not in w2v.keys():
-            W[vocab[word]] = w2v[word + '_0']
-            count0 += 1
-
-        elif word + '_0' not in w2v.keys() and word + '_1' in w2v.keys():
-            W[vocab[word]] = w2v[word + '_1']
-            count1 += 1
-
-        elif word + '_0' in w2v.keys() and word + '_1' in w2v.keys():
-            W[vocab[word]] = (w2v[word + '_1'] + w2v[word + '_0']) / 2
-
-        else:
-            if not w2v.__contains__(word):
-                print('UNK---------------- ', word)
-                w2v[word] = w2v["**UNK**"]
-                unknowtoken +=1
-                W[vocab[word]] = w2v[word]
-            else:
-                W[vocab[word]] = w2v[word]
-
-    print('UnKnown tokens in w2v', unknowtoken)
-    print('count0', count0, 'count1', count1)
     return k, W
 
 
@@ -413,8 +369,7 @@ def get_Character_index(files):
     return source_vob, sourc_idex_word, target_vob, target_idex_word, max_s
 
 
-def get_data(trainfile, testfile, w2v_file, c2v_file,
-             base_datafile, user_datafile, w2v_k, c2v_k=100, data_split=1, maxlen = 50):
+def get_data(trainfile, testfile, w2v_file, c2v_file, base_datafile, user_datafile, w2v_k, c2v_k=100, data_split=1, maxlen = 50):
     """
     数据处理的入口函数
     Converts the input files  into the model input formats
@@ -445,10 +400,7 @@ def get_data(trainfile, testfile, w2v_file, c2v_file,
         print("target vocab size: ", len(target_vob), str(target_vob))
         print("target vocab size: ", len(idex_2target))
 
-        if 'DoubleEmd' in c2v_file:
-            char_k, char_W = load_vec_txt_DoubleEmd(c2v_file, char_vob, c2v_k)
-        else:
-            char_k, char_W = load_vec_txt(c2v_file, char_vob, c2v_k)
+        char_k, char_W = load_vec_txt(c2v_file, char_vob, c2v_k)
         print('character_W shape:', char_W.shape)
 
         print("base dataset created!")
@@ -499,22 +451,4 @@ def get_data(trainfile, testfile, w2v_file, c2v_file,
 
 if __name__=="__main__":
     print(20*2)
-
-    trainfile = './data/subtask1_training_all.conll.txt'
-
-    c2v_file = "./data/preEmbedding/CCKS2019_DoubleEmd_Char2Vec.txt"
-
-    print("Precess base data....")
-    char_vob, idex_2char, target_vob, idex_2target, max_s = get_Character_index({trainfile})
-    print("source char size: ", char_vob.__len__())
-    print("max_s: ", max_s)
-    max_s = 136
-    print("max_s: ", max_s)
-    print("source char: ", len(idex_2char))
-    print("target vocab size: ", len(target_vob), str(target_vob))
-    print("target vocab size: ", len(idex_2target))
-
-    if 'DoubleEmd' in c2v_file:
-        char_k, char_W = load_vec_txt_DoubleEmd(c2v_file, char_vob, 100)
-
 

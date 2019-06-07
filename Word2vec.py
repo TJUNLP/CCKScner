@@ -221,21 +221,21 @@ if __name__ == '__main__':
     # make_data_sent({'./data/weiboNER/weiboNER_2nd_conll.test.BIOES.txt',
     #                 './data/weiboNER/weiboNER_2nd_conll.train.dev.BIOES.txt'})
 
-    save_model_file = "./data/preEmbedding/CCKS2019_onlychar_Char2Vec.txt"
+    save_model_file = "./data/preEmbedding/CCKS2019_DoubleEmd_Char2Vec.txt"
 
 
     # file2 = GetSentences({'./data/weiboNER/weiboNER_2nd_conll.test.BIOES.txt',
     #                       './data/weiboNER/weiboNER_2nd_conll.train.dev.BIOES.txt'},
     #                      './data/weiboNER/origintext.txt')
 
-    Json2text('./data/subtask1_training_all.txt', './data/subtask1_training_all_text.txt')
+    # Json2text('./data/subtask1_training_all.txt', './data/subtask1_training_all_text.txt')
 
     # file2 = './data/weiboNER/weiborawtext.txt.split.posiembed.txt'
     # file2 = './data/MSRA/SogouNews2.txt.split.txt'
-    file2 = './data/subtask1_text4w2v.txt'
+    # file2 = './data/subtask1_text4w2v.txt'
     # file2 = getsplitsent2(file2)
-    # file2 = './data/MSRA/origin_PeopleDay.split.txt'
-    # model_1 = model_train(file2, save_model_file)
+    file2 = './data/subtask1_training_all.txt.DoubleEmd.txt'
+    model_1 = model_train(file2, save_model_file)
 
     # # 加载已训练好的模型
     # model_1 = word2vec.Word2Vec.load(save_model_file)
