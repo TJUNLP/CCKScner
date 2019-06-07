@@ -128,19 +128,48 @@ def train_e2e_model(nn_model, modelfile, inputs_train_x, inputs_train_y, npoches
         nn_model.load_weights(modelfile)
 
     early_stopping = EarlyStopping(monitor='val_loss', patience=10)
-    checkpointer = ModelCheckpoint(filepath=modelfile+".best_model.h5", monitor='val_acc', verbose=0, save_best_only=True, save_weights_only=True)
+    checkpointer = ModelCheckpoint(filepath=modelfile+".best_model.h5", monitor='val_crf_viterbi_accuracy', verbose=0, save_best_only=True, save_weights_only=True)
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=8, min_lr=0.00001)
 
-    nn_model.fit(x=inputs_train_x,
-                 y=inputs_train_y,
-                 batch_size=batch_size,
-                 epochs=npoches,
-                 verbose=1,
-                 shuffle=True,
-                 validation_split=0.2,
-                 callbacks=[reduce_lr, checkpointer, early_stopping])
+    # nn_model.fit(x=inputs_train_x,
+    #              y=inputs_train_y,
+    #              batch_size=batch_size,
+    #              epochs=npoches,
+    #              verbose=1,
+    #              shuffle=True,
+    #              validation_split=0.2,
+    #              callbacks=[reduce_lr, checkpointer, early_stopping])
+    #
+    # nn_model.save_weights(modelfile, overwrite=True)
 
-    nn_model.save_weights(modelfile, overwrite=True)
+    nowepoch = 1
+    increment = 1
+    earlystop = 0
+    maxF = 0.
+    while nowepoch <= npoches:
+        nowepoch += increment
+        earlystop += 1
+        nn_model.fit(x=inputs_train_x,
+                     y=inputs_train_y,
+                     batch_size=batch_size,
+                     epochs=increment,
+                     verbose=1,
+                     shuffle=True,
+                     validation_split=0.2,
+                     callbacks=[reduce_lr, checkpointer])
+
+        P, R, F, PR_count, P_count, TR_count = test_model(nn_model, inputs_test_x, inputs_test_y, idex_2target,
+                                                          resultfile='',
+                                                          batch_size=batch_size)
+        if F > maxF:
+            maxF = F
+            earlystop = 0
+            nn_model.save_weights(modelfile, overwrite=True)
+
+        print(nowepoch, 'P= ', P, '  R= ', R, '  F= ', F, '>>>>>>>>>>>>>>>>>>>>>>>>>>maxF= ', maxF)
+
+        if earlystop > 50:
+            break
 
     return nn_model
 
