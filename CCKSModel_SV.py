@@ -103,7 +103,7 @@ def CNN_CRF_char_SensitiV(charvocabsize, targetvocabsize,
     crflayer = CRF(targetvocabsize+1, sparse_target=False)
     model = crflayer(TimeD)
 
-    Models = Model([char_input], model)
+    Models = Model([char_input, SensitiV_input], model)
 
     # Models.compile(loss=loss, optimizer='adam', metrics=['acc'])
     # Models.compile(loss=crflayer.loss_function, optimizer='adam', metrics=[crflayer.accuracy])
