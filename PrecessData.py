@@ -422,7 +422,7 @@ def calSensitiValues(file, max_s, EntCharDict, OutECDict):
     for line in f.readlines():
 
         if line.__len__() <= 1:
-            data_s = data_s[0:min(len(data_s), max_s)] + [math.log(1e-5)] * max(0, max_s - len(data_s))
+            data_s = data_s[0:min(len(data_s), max_s)] + [[math.log(1e-5)]] * max(0, max_s - len(data_s))
             data_s_all.append(data_s)
             data_s = []
             continue
@@ -430,7 +430,7 @@ def calSensitiValues(file, max_s, EntCharDict, OutECDict):
         sent = line.strip('\r\n').rstrip('\n').split('\t')
         chara = sent[0]
         sv = Sensitivity.calSensitiValue1(chara, EntCharDict, OutECDict)
-        data_s.append(sv)
+        data_s.append([sv])
 
     f.close()
 
