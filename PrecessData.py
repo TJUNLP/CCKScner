@@ -6,7 +6,7 @@ import numpy as np
 import pickle
 import json
 import math, codecs, os
-
+import Sensitivity
 
 def load_vec_pkl(fname,vocab,k=300):
     """
@@ -413,6 +413,30 @@ def get_Character_index(files):
     return source_vob, sourc_idex_word, target_vob, target_idex_word, max_s
 
 
+def calSensitiValues(file, max_s, EntCharDict, OutECDict):
+
+    data_s_all = []
+
+    f = codecs.open(file, 'r', encoding='utf-8')
+    data_s = []
+    for line in f.readlines():
+
+        if line.__len__() <= 1:
+            data_s = data_s[0:min(len(data_s), max_s)] + [math.log(1e-5)] * max(0, max_s - len(data_s))
+            data_s_all.append(data_s)
+            data_s = []
+            continue
+
+        sent = line.strip('\r\n').rstrip('\n').split('\t')
+        chara = sent[0]
+        sv = Sensitivity.calSensitiValue1(chara, EntCharDict, OutECDict)
+        data_s.append(sv)
+
+    f.close()
+
+    return data_s_all
+
+
 def get_data(trainfile, testfile, w2v_file, c2v_file,
              base_datafile, user_datafile, w2v_k, c2v_k=100, data_split=1, maxlen = 50):
     """
@@ -471,6 +495,11 @@ def get_data(trainfile, testfile, w2v_file, c2v_file,
 
     train_all, target_all = make_idx_Char_index(trainfile, max_s, char_vob, target_vob)
 
+    file = './data/subtask1_training_all.txt'
+    EntCharDict, OutECDict = Sensitivity.GetVariousDist(file)
+    train_all_SensitiV = calSensitiValues(file, max_s, EntCharDict, OutECDict)
+
+
     extra_test_num = int(len(train_all) / 5)
     # test_all, test_target_all = make_idx_Char_index(testfile, max_s, char_vob, target_vob)
     # test = train_all[:extra_test_num]
@@ -479,9 +508,11 @@ def get_data(trainfile, testfile, w2v_file, c2v_file,
     # train_label = target_all[extra_test_num:] + test_target_all[:]
     # print('extra_test_num', extra_test_num)
 
-    test = train_all[extra_test_num * (data_split-1):extra_test_num * data_split]
+    test = train_all[extra_test_num * (data_split - 1):extra_test_num * data_split]
+    test_SensitiV = train_all_SensitiV[extra_test_num * (data_split - 1):extra_test_num * data_split]
     test_label = target_all[extra_test_num * (data_split-1):extra_test_num * data_split]
     train = train_all[:extra_test_num * (data_split-1)] + train_all[extra_test_num * data_split:]
+    train_SensitiV = train_all_SensitiV[:extra_test_num * (data_split - 1)] + train_all_SensitiV[extra_test_num * data_split:]
     train_label = target_all[:extra_test_num * (data_split-1)] + target_all[extra_test_num * data_split:]
     print('extra_test_num....data_split', extra_test_num, data_split)
 
@@ -492,8 +523,8 @@ def get_data(trainfile, testfile, w2v_file, c2v_file,
 
     print ("dataset created!")
     out = open(user_datafile, 'wb')
-    pickle.dump([train, train_label,
-                 test, test_label], out, 0)
+    pickle.dump([train, train_SensitiV, train_label,
+                 test, test_SensitiV, test_label], out, 0)
     out.close()
 
 

@@ -68,7 +68,7 @@ def test_model(nn_model, inputs_test_x, test_y, index2word, resultfile ='', batc
     return P, R, F, PR_count, P_count, TR_count
 
 
-def CNN_CRF_char(charvocabsize, targetvocabsize,
+def CNN_CRF_char_SensitiV(charvocabsize, targetvocabsize,
                      char_W,
                      input_seq_lenth,
                      char_k, batch_size=16):
@@ -81,8 +81,14 @@ def CNN_CRF_char(charvocabsize, targetvocabsize,
                               mask_zero=False,
                               trainable=True,
                               weights=[char_W])(char_input)
-    embedding = Dropout(0.5)(char_embedding_RNN)
+    char_embedding = Dropout(0.5)(char_embedding_RNN)
 
+    SensitiV_input = Input(shape=(input_seq_lenth,), dtype='float32')
+
+    sv_embedding_dense = Dense(30, activation=None)(SensitiV_input)
+    sv_embedding = Dropout(0.25)(sv_embedding_dense)
+
+    embedding = concatenate([char_embedding, sv_embedding], axis=-1)
 
     cnn3 = Conv1D(100, 3, activation='relu', strides=1, padding='same')(embedding)
     cnn4 = Conv1D(50, 4, activation='relu', strides=1, padding='same')(embedding)
@@ -111,8 +117,8 @@ def SelectModel(modelname, charvocabsize, targetvocabsize,
                 input_seq_lenth,
                 char_k, batch_size):
     nn_model = None
-    if modelname is 'CNN_CRF_char':
-        nn_model = CNN_CRF_char(charvocabsize=charvocabsize,
+    if modelname is 'CNN_CRF_char_SensitiV':
+        nn_model = CNN_CRF_char_SensitiV(charvocabsize=charvocabsize,
                                               targetvocabsize=targetvocabsize,
                                               char_W=char_W,
                                               input_seq_lenth=input_seq_lenth,
@@ -202,7 +208,7 @@ def infer_e2e_model(nn_model, modelfile, inputs_test_x, inputs_test_y, idex_2tar
 if __name__ == "__main__":
 
     modelname = 'BiLSTM_CRF_char'
-    modelname = 'CNN_CRF_char'
+    modelname = 'CNN_CRF_char_SensitiV'
     print(modelname)
 
     resultdir = "./data/result/"
@@ -210,15 +216,15 @@ if __name__ == "__main__":
 
     trainfile = './data/subtask1_training_all.conll.txt'
     testfile = ''
-    # char2v_file = "./data/preEmbedding/CCKS2019_onlychar_Char2Vec.txt"
-    char2v_file = "./data/preEmbedding/CCKS2019_DoubleEmd_Char2Vec.txt"
+    char2v_file = "./data/preEmbedding/CCKS2019_onlychar_Char2Vec.txt"
+    # char2v_file = "./data/preEmbedding/CCKS2019_DoubleEmd_Char2Vec.txt"
     word2v_file = " "
 
     # base_datafile = './model/cckscner.base.data.pkl'
     # dataname = 'cckscner.user.data.onlyc2v'
 
-    base_datafile = './model/cckscner.base.data.DoubleEmd.pkl'
-    dataname = 'cckscner.user.data.DoubleEmd'
+    base_datafile = './model/cckscner.base.data.pkl'
+    dataname = 'cckscner.user.data.SensitiV'
 
     user_datafile = "./model/" + dataname + ".pkl"
     batch_size = 8
@@ -245,20 +251,22 @@ if __name__ == "__main__":
     char_k, \
     max_s = pickle.load(open(base_datafile, 'rb'))
     print('loading user data ...')
-    train, train_label,\
-    test, test_label = pickle.load(open(user_datafile, 'rb'))
+    train, train_SensitiV, train_label,\
+    test, test_SensitiV, test_label = pickle.load(open(user_datafile, 'rb'))
 
     trainx_char = np.asarray(train, dtype="int32")
+    trainx_SensitiV = np.asarray(train_SensitiV, dtype="float32")
     trainy = np.asarray(train_label, dtype="int32")
     testx_char = np.asarray(test, dtype="int32")
+    testx_SensitiV = np.asarray(test_SensitiV, dtype="float32")
     testy = np.asarray(test_label, dtype="int32")
 
 
     # inputs_train_x = [trainx_char, trainx_posi, trainx_word]
-    inputs_train_x = [trainx_char]
+    inputs_train_x = [trainx_char, trainx_SensitiV]
     inputs_train_y = [trainy]
     # inputs_test_x = [testx_char, testx_posi, testx_word]
-    inputs_test_x = [testx_char]
+    inputs_test_x = [testx_char, testx_SensitiV]
     inputs_test_y = [testy]
 
     for inum in range(0, 3):
