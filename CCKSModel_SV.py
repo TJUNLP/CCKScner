@@ -256,6 +256,7 @@ if __name__ == "__main__":
 
     trainx_char = np.asarray(train, dtype="int32")
     trainx_SensitiV = np.asarray(train_SensitiV, dtype="float32")
+    # print('@@@@@@@@@@', trainx_SensitiV.shape)
     trainy = np.asarray(train_label, dtype="int32")
     testx_char = np.asarray(test, dtype="int32")
     testx_SensitiV = np.asarray(test_SensitiV, dtype="float32")
