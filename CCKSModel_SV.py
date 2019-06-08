@@ -85,7 +85,7 @@ def CNN_CRF_char_SensitiV(charvocabsize, targetvocabsize,
 
     SensitiV_input = Input(shape=(input_seq_lenth,), dtype='float32')
 
-    sv_embedding_dense = Dense(30, activation=None)(SensitiV_input)
+    sv_embedding_dense = TimeDistributed(Dense(30, activation=None))(SensitiV_input)
     sv_embedding = Dropout(0.25)(sv_embedding_dense)
 
     embedding = concatenate([char_embedding, sv_embedding], axis=-1)

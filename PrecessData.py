@@ -497,7 +497,7 @@ def get_data(trainfile, testfile, w2v_file, c2v_file,
 
     file = './data/subtask1_training_all.txt'
     EntCharDict, OutECDict = Sensitivity.GetVariousDist(file)
-    train_all_SensitiV = calSensitiValues(file, max_s, EntCharDict, OutECDict)
+    train_all_SensitiV = calSensitiValues(trainfile, max_s, EntCharDict, OutECDict)
 
 
     extra_test_num = int(len(train_all) / 5)
@@ -545,7 +545,8 @@ if __name__=="__main__":
     print("target vocab size: ", len(target_vob), str(target_vob))
     print("target vocab size: ", len(idex_2target))
 
-    if 'DoubleEmd' in c2v_file:
-        char_k, char_W = load_vec_txt_DoubleEmd(c2v_file, char_vob, 100)
+    file = './data/subtask1_training_all.txt'
+    EntCharDict, OutECDict = Sensitivity.GetVariousDist(file)
+    train_all_SensitiV = calSensitiValues(trainfile, max_s, EntCharDict, OutECDict)
 
 

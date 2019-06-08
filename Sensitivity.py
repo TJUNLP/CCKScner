@@ -129,7 +129,6 @@ def GetVariousDist(file):
 
 def calSensitiValue1(chara, EntCharDict, OutECDict):
     # SVlist = []
-
     if chara not in EntCharDict.keys():
         Numerator = 0 + 1e-5
     else:
@@ -140,7 +139,7 @@ def calSensitiValue1(chara, EntCharDict, OutECDict):
         Denominator = OutECDict[chara]
 
     sv = math.log(Numerator / max(1, Denominator))
-    print(sv)
+
     # SVlist.append(sv)
     #
     # for k, svl in enumerate(SVlist):
