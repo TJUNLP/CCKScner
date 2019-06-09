@@ -85,8 +85,10 @@ def CNN_CRF_char_SensitiV(charvocabsize, targetvocabsize,
 
     SensitiV_input = Input(shape=(input_seq_lenth, 1, ), dtype='float32')
 
-    sv_embedding_dense = TimeDistributed(Dense(30, activation=None))(SensitiV_input)
-    sv_embedding = Dropout(0.25)(sv_embedding_dense)
+    # sv_embedding_dense = TimeDistributed(Dense(30, activation=None))(SensitiV_input)
+    # sv_embedding = Dropout(0.25)(sv_embedding_dense)
+    sv_embedding_lstm = Bidirectional(LSTM(20, return_sequences=True, activation='tanh'), merge_mode='concat')(SensitiV_input)
+    sv_embedding = Dropout(0.3)(sv_embedding_lstm)
 
     embedding = concatenate([char_embedding, sv_embedding], axis=-1)
 
@@ -270,7 +272,7 @@ if __name__ == "__main__":
     inputs_test_x = [testx_char, testx_SensitiV]
     inputs_test_y = [testy]
 
-    for inum in range(0, 3):
+    for inum in range(3, 6):
 
         nnmodel = None
         nnmodel = SelectModel(modelname,
