@@ -210,15 +210,15 @@ if __name__ == "__main__":
 
     trainfile = './data/subtask1_training_all.conll.txt'
     testfile = ''
-    # char2v_file = "./data/preEmbedding/CCKS2019_onlychar_Char2Vec.txt"
-    char2v_file = "./data/preEmbedding/CCKS2019_DoubleEmd_Char2Vec.txt"
+    char2v_file = "./data/preEmbedding/CCKS2019_onlychar_Char2Vec.txt"
+    # char2v_file = "./data/preEmbedding/CCKS2019_DoubleEmd_Char2Vec.txt"
     word2v_file = " "
 
     # base_datafile = './model/cckscner.base.data.pkl'
     # dataname = 'cckscner.user.data.onlyc2v'
 
-    base_datafile = './model/cckscner.base.data.DoubleEmd.pkl'
-    dataname = 'cckscner.user.data.DoubleEmd'
+    base_datafile = './model/cckscner.base.data.pkl'
+    dataname = 'cckscner.user.data.onlychar'
 
     user_datafile = "./model/" + dataname + ".pkl"
     batch_size = 8
