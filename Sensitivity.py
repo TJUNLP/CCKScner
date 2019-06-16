@@ -90,6 +90,8 @@ def GetVariousDist(file):
 
     EntCharDict = {}
     OutECDict = {}
+    count_allc = 0
+    count_entc = 0
 
     fr = codecs.open(file, 'r', encoding='utf-8')
     for line in fr.readlines():
@@ -98,13 +100,14 @@ def GetVariousDist(file):
         originalText = sent['originalText']
         entities = sent['entities']
         tmpposilist = []
-
+        count_allc += len(originalText)
         for ent in entities:
 
             start_pos = int(ent['start_pos'])
             end_pos = int(ent['end_pos'])
 
             for ch in range(start_pos, end_pos):
+                count_entc += 1
                 if originalText[ch] not in EntCharDict.keys():
                     EntCharDict[originalText[ch]] = 1
                 else:
@@ -124,7 +127,84 @@ def GetVariousDist(file):
     print(len(EntCharDict))
     print(len(OutECDict))
 
-    return EntCharDict, OutECDict
+    return EntCharDict, OutECDict, count_allc, count_entc
+
+
+def calSensitiIG(chara, EntCharDict, OutECDict, count_allc, count_entc):
+
+    H_C = -1 * (
+                (count_entc / count_allc) * math.log2(count_entc / count_allc)
+    )
+    count_chara_ent = 0
+    if chara in EntCharDict.keys():
+        count_chara_ent = EntCharDict[chara]
+    count_chara_out = 0
+    if chara in OutECDict.keys():
+        count_chara_out = OutECDict[chara]
+
+    H_C1_w  = (
+            ((count_chara_ent + count_chara_out) / count_allc)
+            * (
+                    (count_chara_ent / (count_chara_ent + count_chara_out))
+                    *
+                    math.log2(count_chara_ent + 1e-5 / (count_chara_ent + count_chara_out))
+            )
+    )
+    H_CO_w = (
+        ((count_allc - count_chara_ent - count_chara_out) / count_allc)
+        * (
+            (count_entc - count_chara_ent) / (count_allc - count_chara_ent - count_chara_out)
+            *
+            math.log2((count_entc - count_chara_ent) / (count_allc - count_chara_ent - count_chara_out))
+        )
+    )
+    IG_chara = H_C + H_C1_w + H_CO_w
+
+    return IG_chara
+
+
+def calSensitiIG0(chara, EntCharDict, OutECDict, count_allc, count_entc):
+    H_C = -(
+            (count_entc / count_allc) * math.log2(count_entc / count_allc)
+            +
+            ((count_allc - count_entc) / count_allc) * math.log2((count_allc - count_entc) / count_allc)
+    )
+    count_chara_ent = 0
+    if chara in EntCharDict.keys():
+        count_chara_ent = EntCharDict[chara]
+    count_chara_out = 0
+    if chara in OutECDict.keys():
+        count_chara_out = OutECDict[chara]
+
+    H_C1_w = (
+            ((count_chara_ent + count_chara_out) / count_allc)
+            * (
+                    (count_chara_ent / (count_chara_ent + count_chara_out))
+                    *
+                    math.log2(count_chara_ent + 1e-5 / (count_chara_ent + count_chara_out))
+                    +
+                    (count_chara_out / (count_chara_ent + count_chara_out))
+                    *
+                    math.log2(count_chara_out + 1e-5 / (count_chara_ent + count_chara_out))
+            )
+    )
+    H_CO_w = (
+            ((count_allc - count_chara_ent - count_chara_out) / count_allc)
+            * (
+                    (count_entc - count_chara_ent) / (count_allc - count_chara_ent - count_chara_out)
+                    *
+                    math.log2((count_entc - count_chara_ent) / (count_allc - count_chara_ent - count_chara_out))
+                    +
+                    (count_allc - count_entc - count_chara_out) / (count_allc - count_chara_ent - count_chara_out)
+                    *
+                    math.log2(
+                        (count_allc - count_entc - count_chara_out) / (count_allc - count_chara_ent - count_chara_out))
+
+            )
+    )
+    IG_chara = H_C + H_C1_w + H_CO_w
+
+    return IG_chara
 
 
 def calSensitiValue1(chara, EntCharDict, OutECDict):
@@ -279,9 +359,9 @@ if __name__ == '__main__':
     # AddDE2Conll(file, conllfile)
 
     txt = '，患者3月前因“直肠癌”于在我院于全麻上行直肠癌根治术（DIXON术），手术过程顺利，术后给予抗感染及营养支持治疗，患者恢复好，切口愈合良好。'
-    EntCharDict, OutECDict = GetVariousDist(file)
+    EntCharDict, OutECDict, count_allc, count_entc = GetVariousDist(file)
     calSensitiValue1('*****', EntCharDict, OutECDict)
-    print(math.log(10))
-    print(math.log(100))
-    print(math.log(1000))
-    print(math.log(10000))
+
+    for i, chara in enumerate(txt):
+        ig = calSensitiIG0(chara, EntCharDict, OutECDict, count_allc, count_entc)
+        print(i+1, ig)
