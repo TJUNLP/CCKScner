@@ -165,6 +165,54 @@ def CNN_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
     return Models
 
 
+def LSTM_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
+                     char_W,
+                     input_seq_lenth,
+                     char_k, batch_size=16):
+
+
+    char_input = Input(shape=(input_seq_lenth,), dtype='int32')
+    char_embedding_RNN = Embedding(input_dim=charvocabsize + 1,
+                              output_dim=char_k,
+                              input_length=input_seq_lenth,
+                              mask_zero=False,
+                              trainable=True,
+                              weights=[char_W])(char_input)
+    char_embedding = Dropout(0.5)(char_embedding_RNN)
+
+    SensitiV_input = Input(shape=(input_seq_lenth, 1, ), dtype='float32')
+
+
+    attention_probs = Dense(1, activation='softmax')(SensitiV_input)  # [b_size,maxlen,1]
+    attention = Flatten()(attention_probs)
+    attention = RepeatVector(400)(attention)
+    attention = Permute([2, 1])(attention)
+    # apply the attention
+    # embedding = multiply([char_embedding, attention])
+    embedding = char_embedding
+    # embedding = concatenate([char_embedding, sv_embedding], axis=-1)
+
+    BiLSTM = Bidirectional(LSTM(200, activation='tanh'), merge_mode='concat')(embedding)
+    BiLSTM = Dropout(0.5)(BiLSTM)
+
+    BiLSTM = BatchNormalization(axis=1)(BiLSTM)
+    cnns = multiply([BiLSTM, attention])
+    cnns = Dropout(0.5)(cnns)
+
+    TimeD = TimeDistributed(Dense(targetvocabsize+1))(cnns)
+
+    crflayer = CRF(targetvocabsize+1, sparse_target=False)
+    model = crflayer(TimeD)
+
+    Models = Model([char_input, SensitiV_input], model)
+
+    # Models.compile(loss=loss, optimizer='adam', metrics=['acc'])
+    # Models.compile(loss=crflayer.loss_function, optimizer='adam', metrics=[crflayer.accuracy])
+    Models.compile(loss=crflayer.loss_function, optimizer=optimizers.Adam(lr=0.001), metrics=[crflayer.accuracy])
+
+    return Models
+
+
 def SelectModel(modelname, charvocabsize, targetvocabsize,
                 char_W,
                 input_seq_lenth,
@@ -182,6 +230,13 @@ def SelectModel(modelname, charvocabsize, targetvocabsize,
                                               char_W=char_W,
                                               input_seq_lenth=input_seq_lenth,
                                               char_k=char_k, batch_size=batch_size)
+    elif modelname is 'LSTM_CRF_char_SensitiV_attention':
+        nn_model = LSTM_CRF_char_SensitiV_attention(charvocabsize=charvocabsize,
+                                              targetvocabsize=targetvocabsize,
+                                              char_W=char_W,
+                                              input_seq_lenth=input_seq_lenth,
+                                              char_k=char_k, batch_size=batch_size)
+
 
     return nn_model
 
@@ -268,6 +323,7 @@ if __name__ == "__main__":
     modelname = 'BiLSTM_CRF_char'
     modelname = 'CNN_CRF_char_SensitiV'
     modelname = 'CNN_CRF_char_SensitiV_attention'
+    modelname = 'LSTM_CRF_char_SensitiV_attention'
     
     print(modelname)
 
