@@ -134,7 +134,7 @@ def CNN_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
     attention = Flatten()(SensitiV_input)
     attention_probs = Dense(1, activation='softmax')(attention)  # [b_size,maxlen,1]
 
-    attention = RepeatVector(100)(attention)
+    attention = RepeatVector(100)(attention_probs)
     attention = Permute([2, 1])(attention)
     # apply the attention
     embedding = multiply([char_embedding, attention])
