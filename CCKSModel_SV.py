@@ -134,11 +134,11 @@ def CNN_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
 
     attention_probs = Dense(1, activation='softmax')(SensitiV_input)  # [b_size,maxlen,1]
     attention = Flatten()(attention_probs)
-    attention = RepeatVector(100)(attention)
+    attention = RepeatVector(250)(attention)
     attention = Permute([2, 1])(attention)
     # apply the attention
-    embedding = multiply([char_embedding, attention])
-
+    # embedding = multiply([char_embedding, attention])
+    embedding = char_embedding
     # embedding = concatenate([char_embedding, sv_embedding], axis=-1)
 
     cnn3 = Conv1D(100, 3, activation='relu', strides=1, padding='same')(embedding)
@@ -148,6 +148,7 @@ def CNN_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
     cnns = concatenate([cnn5, cnn3, cnn4, cnn2], axis=-1)
 
     cnns = BatchNormalization(axis=1)(cnns)
+    cnns = multiply([cnns, attention])
     cnns = Dropout(0.5)(cnns)
 
     TimeD = TimeDistributed(Dense(targetvocabsize+1))(cnns)
