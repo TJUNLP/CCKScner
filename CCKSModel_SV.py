@@ -192,7 +192,7 @@ def LSTM_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
     embedding = char_embedding
     # embedding = concatenate([char_embedding, sv_embedding], axis=-1)
 
-    BiLSTM = Bidirectional(LSTM(200, activation='tanh'), merge_mode='concat')(embedding)
+    BiLSTM = Bidirectional(LSTM(200, activation='tanh',return_sequences=True), merge_mode='concat')(embedding)
     BiLSTM = Dropout(0.5)(BiLSTM)
 
     BiLSTM = BatchNormalization(axis=1)(BiLSTM)
