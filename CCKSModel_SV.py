@@ -182,24 +182,24 @@ def LSTM_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
 
     SensitiV_input = Input(shape=(input_seq_lenth, 1, ), dtype='float32')
 
+    attention_hard = Dense(1, activation='softmax')(SensitiV_input)  # [b_size,maxlen,1]
 
-    attention_probs = Dense(1, activation='softmax')(SensitiV_input)  # [b_size,maxlen,1]
-    attention = Flatten()(attention_probs)
-    attention = RepeatVector(400)(attention)
-    attention = Permute([2, 1])(attention)
-    # apply the attention
-    # embedding = multiply([char_embedding, attention])
+
     embedding = char_embedding
     # embedding = concatenate([char_embedding, sv_embedding], axis=-1)
 
     BiLSTM = Bidirectional(LSTM(200, activation='tanh',return_sequences=True), merge_mode='concat')(embedding)
-    BiLSTM = Dropout(0.5)(BiLSTM)
-
     BiLSTM = BatchNormalization(axis=1)(BiLSTM)
-    cnns = multiply([BiLSTM, attention])
-    cnns = Dropout(0.5)(cnns)
 
-    TimeD = TimeDistributed(Dense(targetvocabsize+1))(cnns)
+    attention_self = Dense(1, activation='tanh')(BiLSTM)
+    attention_self = Activation('softmax')(attention_self)
+    # attention_self = Flatten()(attention_self)
+    attention_multi = Lambda(lambda x: (x[0] + x[1])*0.5)([attention_self, attention_hard])
+    representation = Lambda(lambda x: x[0] * x[1])([attention_multi, BiLSTM])
+
+    representation = Dropout(0.5)(representation)
+
+    TimeD = TimeDistributed(Dense(targetvocabsize+1))(representation)
 
     crflayer = CRF(targetvocabsize+1, sparse_target=False)
     model = crflayer(TimeD)
@@ -386,7 +386,7 @@ if __name__ == "__main__":
     inputs_test_x = [testx_char, testx_SensitiV]
     inputs_test_y = [testy]
 
-    for inum in range(3, 6):
+    for inum in range(6, 9):
 
         nnmodel = None
         nnmodel = SelectModel(modelname,
