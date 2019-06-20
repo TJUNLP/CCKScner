@@ -87,10 +87,10 @@ def CNN_CRF_char_SensitiV(charvocabsize, targetvocabsize,
 
     # sv_embedding_dense = TimeDistributed(Dense(30, activation=None))(SensitiV_input)
     # sv_embedding = Dropout(0.25)(sv_embedding_dense)
-    sv_embedding_lstm = Bidirectional(LSTM(20, return_sequences=True, activation='tanh'), merge_mode='concat')(SensitiV_input)
-    sv_embedding = Dropout(0.3)(sv_embedding_lstm)
+    # sv_embedding_lstm = Bidirectional(LSTM(20, return_sequences=True, activation='tanh'), merge_mode='concat')(SensitiV_input)
+    # sv_embedding = Dropout(0.3)(sv_embedding_lstm)
 
-    embedding = concatenate([char_embedding, sv_embedding], axis=-1)
+    embedding = concatenate([char_embedding, SensitiV_input], axis=-1)
 
     cnn3 = Conv1D(100, 3, activation='relu', strides=1, padding='same')(embedding)
     cnn4 = Conv1D(50, 4, activation='relu', strides=1, padding='same')(embedding)
@@ -320,10 +320,10 @@ def infer_e2e_model(nn_model, modelfile, inputs_test_x, inputs_test_y, idex_2tar
 
 if __name__ == "__main__":
 
-    modelname = 'BiLSTM_CRF_char'
+    # modelname = 'BiLSTM_CRF_char'
     modelname = 'CNN_CRF_char_SensitiV'
-    modelname = 'CNN_CRF_char_SensitiV_attention'
-    modelname = 'LSTM_CRF_char_SensitiV_attention'
+    # modelname = 'CNN_CRF_char_SensitiV_attention'
+    # modelname = 'LSTM_CRF_char_SensitiV_attention'
     
     print(modelname)
 
@@ -386,7 +386,7 @@ if __name__ == "__main__":
     inputs_test_x = [testx_char, testx_SensitiV]
     inputs_test_y = [testy]
 
-    for inum in range(6, 9):
+    for inum in range(9, 12):
 
         nnmodel = None
         nnmodel = SelectModel(modelname,
