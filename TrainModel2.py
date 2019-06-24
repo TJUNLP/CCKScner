@@ -6,7 +6,7 @@ import os.path
 import numpy as np
 import matplotlib.pyplot as plt
 from keras import backend as K
-from PrecessData import get_data
+from ProcessData import get_data
 from Evaluate import evaluation_NER
 
 from keras.layers import Flatten,Lambda,Conv2D
