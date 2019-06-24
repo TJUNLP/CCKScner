@@ -165,10 +165,10 @@ if __name__ == "__main__":
     posi_vob, idex_2posi, posi_k, posi_W = pickle.load(open(user_datafile, 'rb'))
 
     trainx_char = np.asarray(train, dtype="int32")
-    trainx_posi = np.asarray(train_posi, dtype="float32")
+    trainx_posi = np.asarray(train_posi, dtype="int32")
     trainy = np.asarray(train_label, dtype="int32")
     testx_char = np.asarray(test, dtype="int32")
-    testx_posi = np.asarray(test_posi, dtype="float32")
+    testx_posi = np.asarray(test_posi, dtype="int32")
     testy = np.asarray(test_label, dtype="int32")
 
     # inputs_train_x = [trainx_char, trainx_posi, trainx_word]

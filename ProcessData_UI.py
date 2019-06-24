@@ -290,7 +290,7 @@ def make_idx_Posi_index(posi_list, max_s, posi_vob):
         for word in line:
             # print(word)
             result.append(posi_vob[str(word)])
-        result = result + [0] * max(0, max_s - len(result))
+        result = result[0:min(max_s, len(result))] + [0] * max(0, max_s - len(result))
 
         result_all.append(result)
 
