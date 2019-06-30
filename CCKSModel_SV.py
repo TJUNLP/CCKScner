@@ -132,12 +132,12 @@ def CNN_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
     SensitiV_input = Input(shape=(input_seq_lenth, 1, ), dtype='float32')
 
 
-    attention_probs = Dense(1, activation='softmax')(SensitiV_input)  # [b_size,maxlen,1]
-    attention = Flatten()(attention_probs)
-    attention = RepeatVector(250)(attention)
-    attention = Permute([2, 1])(attention)
-    # apply the attention
-    # embedding = multiply([char_embedding, attention])
+    # attention_probs = Dense(1, activation='softmax')(SensitiV_input)  # [b_size,maxlen,1]
+    # attention = Flatten()(attention_probs)
+    # attention = RepeatVector(250)(attention)
+    # attention = Permute([2, 1])(attention)
+    # # apply the attention
+    # # embedding = multiply([char_embedding, attention])
     embedding = char_embedding
     # embedding = concatenate([char_embedding, sv_embedding], axis=-1)
 
@@ -147,11 +147,16 @@ def CNN_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
     cnn5 = Conv1D(50, 5, activation='relu', strides=1, padding='same')(embedding)
     cnns = concatenate([cnn5, cnn3, cnn4, cnn2], axis=-1)
 
-    cnns = BatchNormalization(axis=1)(cnns)
-    cnns = multiply([cnns, attention])
-    cnns = Dropout(0.5)(cnns)
+    SensitiV_input = Flatten()(SensitiV_input)
+    attention_self = Dense(1, activation='tanh')(cnns)
+    attention_concat = concatenate([attention_self, SensitiV_input], axis=-1)
+    attention_probs = Activation('softmax')(attention_concat)
+    # attention_self = Flatten()(attention_self)
+    # attention_multi = Lambda(lambda x: (x[0] + x[1])*0.5)([attention_self, attention_hard])
+    representation = Lambda(lambda x: x[0] * x[1])([attention_probs, cnns])
+    representation = Dropout(0.5)(representation)
 
-    TimeD = TimeDistributed(Dense(targetvocabsize+1))(cnns)
+    TimeD = TimeDistributed(Dense(targetvocabsize+1))(representation)
 
     crflayer = CRF(targetvocabsize+1, sparse_target=False)
     model = crflayer(TimeD)
@@ -322,7 +327,7 @@ if __name__ == "__main__":
 
     # modelname = 'BiLSTM_CRF_char'
     modelname = 'CNN_CRF_char_SensitiV'
-    # modelname = 'CNN_CRF_char_SensitiV_attention'
+    modelname = 'CNN_CRF_char_SensitiV_attention'
     # modelname = 'LSTM_CRF_char_SensitiV_attention'
     
     print(modelname)
