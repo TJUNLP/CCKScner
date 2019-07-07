@@ -185,6 +185,8 @@ def CNN_CRF_char_attention1(charvocabsize, targetvocabsize,
                               weights=[char_W])(char_input)
     char_embedding = Dropout(0.5)(char_embedding_RNN)
 
+    SensitiV_input = Input(shape=(input_seq_lenth, 1,), dtype='float32')
+
     # attention_probs = Dense(1, activation='softmax')(SensitiV_input)  # [b_size,maxlen,1]
     # attention = Flatten()(attention_probs)
     # attention = RepeatVector(250)(attention)
@@ -213,7 +215,7 @@ def CNN_CRF_char_attention1(charvocabsize, targetvocabsize,
     crflayer = CRF(targetvocabsize+1, sparse_target=False)
     model = crflayer(TimeD)
 
-    Models = Model([char_input], model)
+    Models = Model([char_input, SensitiV_input], model)
 
     # Models.compile(loss=loss, optimizer='adam', metrics=['acc'])
     # Models.compile(loss=crflayer.loss_function, optimizer='adam', metrics=[crflayer.accuracy])
