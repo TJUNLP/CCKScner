@@ -113,7 +113,6 @@ def CNN_CRF_char_SensitiV(charvocabsize, targetvocabsize,
 
     return Models
 
-
 def CNN_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
                      char_W,
                      input_seq_lenth,
@@ -163,6 +162,58 @@ def CNN_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
     model = crflayer(TimeD)
 
     Models = Model([char_input, SensitiV_input], model)
+
+    # Models.compile(loss=loss, optimizer='adam', metrics=['acc'])
+    # Models.compile(loss=crflayer.loss_function, optimizer='adam', metrics=[crflayer.accuracy])
+    Models.compile(loss=crflayer.loss_function, optimizer=optimizers.Adam(lr=0.001), metrics=[crflayer.accuracy])
+
+    return Models
+
+
+def CNN_CRF_char_attention1(charvocabsize, targetvocabsize,
+                     char_W,
+                     input_seq_lenth,
+                     char_k, batch_size=16):
+
+
+    char_input = Input(shape=(input_seq_lenth,), dtype='int32')
+    char_embedding_RNN = Embedding(input_dim=charvocabsize + 1,
+                              output_dim=char_k,
+                              input_length=input_seq_lenth,
+                              mask_zero=False,
+                              trainable=True,
+                              weights=[char_W])(char_input)
+    char_embedding = Dropout(0.5)(char_embedding_RNN)
+
+    # attention_probs = Dense(1, activation='softmax')(SensitiV_input)  # [b_size,maxlen,1]
+    # attention = Flatten()(attention_probs)
+    # attention = RepeatVector(250)(attention)
+    # attention = Permute([2, 1])(attention)
+    # # apply the attention
+    # # embedding = multiply([char_embedding, attention])
+    embedding = char_embedding
+    # embedding = concatenate([char_embedding, sv_embedding], axis=-1)
+
+    cnn3 = Conv1D(100, 3, activation='relu', strides=1, padding='same')(embedding)
+    cnn4 = Conv1D(50, 4, activation='relu', strides=1, padding='same')(embedding)
+    cnn2 = Conv1D(50, 2, activation='relu', strides=1, padding='same')(embedding)
+    cnn5 = Conv1D(50, 5, activation='relu', strides=1, padding='same')(embedding)
+    cnns = concatenate([cnn5, cnn3, cnn4, cnn2], axis=-1)
+
+    attention_self = Dense(1, activation='tanh')(cnns)
+    attention_probs = Activation('softmax')(attention_self)
+
+    # attention_probs = Flatten()(attention_probs)
+    # attention_multi = Lambda(lambda x: (x[0] + x[1])*0.5)([attention_self, attention_hard])
+    representation = Lambda(lambda x: x[0] * x[1])([attention_probs, cnns])
+    representation = Dropout(0.5)(representation)
+
+    TimeD = TimeDistributed(Dense(targetvocabsize+1))(representation)
+
+    crflayer = CRF(targetvocabsize+1, sparse_target=False)
+    model = crflayer(TimeD)
+
+    Models = Model([char_input], model)
 
     # Models.compile(loss=loss, optimizer='adam', metrics=['acc'])
     # Models.compile(loss=crflayer.loss_function, optimizer='adam', metrics=[crflayer.accuracy])
@@ -230,12 +281,21 @@ def SelectModel(modelname, charvocabsize, targetvocabsize,
                                               char_W=char_W,
                                               input_seq_lenth=input_seq_lenth,
                                               char_k=char_k, batch_size=batch_size)
+
+    elif modelname is 'CNN_CRF_char_attention1':
+        nn_model = CNN_CRF_char_attention1(charvocabsize=charvocabsize,
+                                              targetvocabsize=targetvocabsize,
+                                              char_W=char_W,
+                                              input_seq_lenth=input_seq_lenth,
+                                              char_k=char_k, batch_size=batch_size)
+
     elif modelname is 'CNN_CRF_char_SensitiV_attention':
         nn_model = CNN_CRF_char_SensitiV_attention(charvocabsize=charvocabsize,
                                               targetvocabsize=targetvocabsize,
                                               char_W=char_W,
                                               input_seq_lenth=input_seq_lenth,
                                               char_k=char_k, batch_size=batch_size)
+
     elif modelname is 'LSTM_CRF_char_SensitiV_attention':
         nn_model = LSTM_CRF_char_SensitiV_attention(charvocabsize=charvocabsize,
                                               targetvocabsize=targetvocabsize,
@@ -330,6 +390,7 @@ if __name__ == "__main__":
     modelname = 'CNN_CRF_char_SensitiV'
     modelname = 'CNN_CRF_char_SensitiV_attention'
     # modelname = 'LSTM_CRF_char_SensitiV_attention'
+    modelname = 'CNN_CRF_char_attention1'
     
     print(modelname)
 
@@ -392,7 +453,7 @@ if __name__ == "__main__":
     inputs_test_x = [testx_char, testx_SensitiV]
     inputs_test_y = [testy]
 
-    for inum in range(9, 12):
+    for inum in range(0, 3):
 
         nnmodel = None
         nnmodel = SelectModel(modelname,
