@@ -124,7 +124,7 @@ def evaluation_NER(testresult):
     total_predict_right = 0.
     total_predict = 0.
     total_right = 0.
-
+    rlid = 0
     for si, sent in enumerate(testresult):
 
         ptag = sent[0]
@@ -139,6 +139,7 @@ def evaluation_NER(testresult):
         # '症状描述-B': 16, '症状描述-E': 17, '症状描述-I': 19, '症状描述-S': 15,}
         i = 0
         while i < len(ttag):
+            rlid += 1
             count = 0
             for sign in ['影像检查', '手术', '实验室检验', '药物', '疾病和诊断', '解剖部位']:
 
@@ -165,8 +166,9 @@ def evaluation_NER(testresult):
                             # print(i, ttag[i], 'total_right = ', total_right)
                             break
                         else:
-                            print(si)
+                            print(rlid + si)
                             print(ttag[i], i)
+                            break
                     i = j + 1
                     break
 
@@ -175,7 +177,8 @@ def evaluation_NER(testresult):
                     if count >= 6:
                         print('error-other', i, '  --' + ttag[i] + '--')
                         print(ttag)
-                        print(si)
+                        print(rlid + si)
+                    break
         # print('total_right = ', total_right)
 
         i = 0
