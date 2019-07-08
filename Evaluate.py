@@ -168,7 +168,7 @@ def evaluation_NER(testresult):
                         else:
                             print(rlid + si)
                             print(ttag[i], i)
-                            break
+                            # break
                     i = j + 1
                     break
 
@@ -178,7 +178,7 @@ def evaluation_NER(testresult):
                         print('error-other', i, '  --' + ttag[i] + '--')
                         print(ttag)
                         print(rlid + si)
-                        break
+                        # break
         # print('total_right = ', total_right)
 
         i = 0

@@ -463,8 +463,8 @@ def get_data(trainfile, testfile, w2v_file, c2v_file,
         char_vob, idex_2char, target_vob, idex_2target, max_s = get_Character_index({trainfile})
         print("source char size: ", char_vob.__len__())
         print("max_s: ", max_s)
-        max_s = 136
-        print("max_s: ", max_s)
+        # max_s = 136
+        # print("max_s: ", max_s)
         print("source char: ", len(idex_2char))
         print("target vocab size: ", len(target_vob), str(target_vob))
         print("target vocab size: ", len(idex_2target))
@@ -496,7 +496,7 @@ def get_data(trainfile, testfile, w2v_file, c2v_file,
     train_all, target_all = make_idx_Char_index(trainfile, max_s, char_vob, target_vob)
 
     file = './data/subtask1_training_all.txt'
-    EntCharDict, OutECDict = Sensitivity.GetVariousDist(file)
+    EntCharDict, OutECDict, count_allc, count_entc = Sensitivity.GetVariousDist(file)
     train_all_SensitiV = calSensitiValues(trainfile, max_s, EntCharDict, OutECDict)
 
 
