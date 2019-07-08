@@ -400,7 +400,7 @@ def train_e2e_model(nn_model, modelfile, inputs_train_x, inputs_train_y, npoches
                      validation_split=0.2,
                      callbacks=[reduce_lr, checkpointer])
 
-        P, R, F, PR_count, P_count, TR_count = test_model(nn_model, inputs_test_x, inputs_test_y, idex_2target,
+        P, R, F, PR_count, P_count, TR_count = test_model(nn_model, inputs_train_x, inputs_train_y, idex_2target,
                                                           resultfile='',
                                                           batch_size=batch_size)
         print('Train ... P= ', P, '  R= ', R, '  F= ', F)
