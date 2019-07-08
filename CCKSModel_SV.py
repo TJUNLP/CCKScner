@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from keras import backend as K
 from ProcessData import get_data
 from Evaluate import evaluation_NER
-
+from keras_self_attention import SeqSelfAttention
 from keras.layers import Flatten,Lambda,Conv2D
 from keras.layers.core import Dropout, Activation, Permute, RepeatVector
 from keras.layers.merge import concatenate, Concatenate, multiply, Dot
@@ -224,6 +224,61 @@ def CNN_CRF_char_attention1(charvocabsize, targetvocabsize,
     return Models
 
 
+def CNN_CRF_char_attention2(charvocabsize, targetvocabsize,
+                     char_W,
+                     input_seq_lenth,
+                     char_k, batch_size=16):
+
+
+    char_input = Input(shape=(input_seq_lenth,), dtype='int32')
+    char_embedding_RNN = Embedding(input_dim=charvocabsize + 1,
+                              output_dim=char_k,
+                              input_length=input_seq_lenth,
+                              mask_zero=False,
+                              trainable=True,
+                              weights=[char_W])(char_input)
+    char_embedding = Dropout(0.5)(char_embedding_RNN)
+
+    SensitiV_input = Input(shape=(input_seq_lenth, 1,), dtype='float32')
+
+    # attention_probs = Dense(1, activation='softmax')(SensitiV_input)  # [b_size,maxlen,1]
+    # attention = Flatten()(attention_probs)
+    # attention = RepeatVector(250)(attention)
+    # attention = Permute([2, 1])(attention)
+    # # apply the attention
+    # # embedding = multiply([char_embedding, attention])
+    embedding = char_embedding
+    # embedding = concatenate([char_embedding, sv_embedding], axis=-1)
+
+    cnn3 = Conv1D(100, 3, activation='relu', strides=1, padding='same')(embedding)
+    cnn4 = Conv1D(50, 4, activation='relu', strides=1, padding='same')(embedding)
+    cnn2 = Conv1D(50, 2, activation='relu', strides=1, padding='same')(embedding)
+    cnn5 = Conv1D(50, 5, activation='relu', strides=1, padding='same')(embedding)
+    cnns = concatenate([cnn5, cnn3, cnn4, cnn2], axis=-1)
+
+
+
+    attention_self = SeqSelfAttention(attention_activation='softmax',
+                                      attention_width=10,
+                                      use_attention_bias=False,
+                                      attention_type=SeqSelfAttention.ATTENTION_TYPE_MUL)(cnns)
+
+    representation = Dropout(0.5)(attention_self)
+
+    TimeD = TimeDistributed(Dense(targetvocabsize+1))(representation)
+
+    crflayer = CRF(targetvocabsize+1, sparse_target=False)
+    model = crflayer(TimeD)
+
+    Models = Model([char_input, SensitiV_input], model)
+
+    # Models.compile(loss=loss, optimizer='adam', metrics=['acc'])
+    # Models.compile(loss=crflayer.loss_function, optimizer='adam', metrics=[crflayer.accuracy])
+    Models.compile(loss=crflayer.loss_function, optimizer=optimizers.Adam(lr=0.001), metrics=[crflayer.accuracy])
+
+    return Models
+
+
 def LSTM_CRF_char_SensitiV_attention(charvocabsize, targetvocabsize,
                      char_W,
                      input_seq_lenth,
@@ -284,8 +339,8 @@ def SelectModel(modelname, charvocabsize, targetvocabsize,
                                               input_seq_lenth=input_seq_lenth,
                                               char_k=char_k, batch_size=batch_size)
 
-    elif modelname is 'CNN_CRF_char_attention1':
-        nn_model = CNN_CRF_char_attention1(charvocabsize=charvocabsize,
+    elif modelname is 'CNN_CRF_char_attention2':
+        nn_model = CNN_CRF_char_attention2(charvocabsize=charvocabsize,
                                               targetvocabsize=targetvocabsize,
                                               char_W=char_W,
                                               input_seq_lenth=input_seq_lenth,
@@ -348,6 +403,11 @@ def train_e2e_model(nn_model, modelfile, inputs_train_x, inputs_train_y, npoches
         P, R, F, PR_count, P_count, TR_count = test_model(nn_model, inputs_test_x, inputs_test_y, idex_2target,
                                                           resultfile='',
                                                           batch_size=batch_size)
+        print('Train ... P= ', P, '  R= ', R, '  F= ', F)
+
+        P, R, F, PR_count, P_count, TR_count = test_model(nn_model, inputs_test_x, inputs_test_y, idex_2target,
+                                                          resultfile='',
+                                                          batch_size=batch_size)
         if F > maxF:
             maxF = F
             earlystop = 0
@@ -392,7 +452,7 @@ if __name__ == "__main__":
     modelname = 'CNN_CRF_char_SensitiV'
     modelname = 'CNN_CRF_char_SensitiV_attention'
     # modelname = 'LSTM_CRF_char_SensitiV_attention'
-    modelname = 'CNN_CRF_char_attention1'
+    modelname = 'CNN_CRF_char_attention2'
     
     print(modelname)
 
