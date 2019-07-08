@@ -450,9 +450,9 @@ if __name__ == "__main__":
 
     # modelname = 'BiLSTM_CRF_char'
     modelname = 'CNN_CRF_char_SensitiV'
-    modelname = 'CNN_CRF_char_SensitiV_attention'
+    # modelname = 'CNN_CRF_char_SensitiV_attention'
     # modelname = 'LSTM_CRF_char_SensitiV_attention'
-    modelname = 'CNN_CRF_char_attention2'
+    # modelname = 'CNN_CRF_char_attention2'
     
     print(modelname)
 
@@ -468,8 +468,8 @@ if __name__ == "__main__":
     # base_datafile = './model/cckscner.base.data.pkl'
     # dataname = 'cckscner.user.data.onlyc2v'
 
-    base_datafile = './model/model_data/cckscner.base.data.pkl'
-    dataname = 'cckscner.user.data.SensitiV'
+    base_datafile = './model/model_data/cckscner.base.data.longlength.pkl'
+    dataname = 'cckscner.user.data.SensitiV.longlength'
 
     user_datafile = "./model/model_data/" + dataname + ".pkl"
     batch_size = 1
