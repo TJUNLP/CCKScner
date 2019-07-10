@@ -259,8 +259,6 @@ def CNN_CRF_char_attention2(charvocabsize, targetvocabsize,
 
 
     attention_self = SeqSelfAttention(attention_activation='softmax',
-                                      attention_width=10,
-                                      use_attention_bias=False,
                                       attention_type=SeqSelfAttention.ATTENTION_TYPE_MUL)(cnns)
 
     representation = Dropout(0.5)(attention_self)
@@ -452,7 +450,7 @@ if __name__ == "__main__":
     modelname = 'CNN_CRF_char_SensitiV'
     # modelname = 'CNN_CRF_char_SensitiV_attention'
     # modelname = 'LSTM_CRF_char_SensitiV_attention'
-    # modelname = 'CNN_CRF_char_attention2'
+    modelname = 'CNN_CRF_char_attention2'
     
     print(modelname)
 
