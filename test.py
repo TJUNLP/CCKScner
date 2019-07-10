@@ -70,14 +70,14 @@ def calcute_length_of_entity():
 def trainset_json2conll():
 
     file = './data/subtask1_training_all.txt'
-    # file2 = './data/subtask1_training_all.conll.txt'
+    file2 = './data/subtask1_training_all.conll.4.txt'
     count = 0
     ssss = 0
     dictlen = {}
     fr = codecs.open(file, 'r', encoding='utf-8')
-    # fw = codecs.open(file2, 'w', encoding='utf-8')
+    fw = codecs.open(file2, 'w', encoding='utf-8')
     for line in fr.readlines():
-        print(line)
+        # print(line)
         sent = json.loads(line.rstrip('\r\n').rstrip('\n'))
         originalText = sent['originalText']
         entities = sent['entities']
@@ -97,28 +97,88 @@ def trainset_json2conll():
                 taglist[end_pos-1] = label_type + '-E'
 
         sublens = 0
+        posi = 0
+        tlist_all = []
+        tlist = []
         for ci, chara in enumerate(originalText):
-
-            # fw.write(chara + '\t' + taglist[ci] + '\n')
+            posi += 1
+            tlist.append(chara + '\t' + taglist[ci] + '\n')
             sublens += 1
-            if chara == '。':
-                # fw.write('\n')
-                if sublens in dictlen.keys():
-                    dictlen[sublens] += 1
-                else:
-                    dictlen[sublens] = 1
-                # if sublens >136 :
-                    # print(originalText)
-                sublens = 0
+
+            if (chara == '。' or chara == '，') and taglist[ci] == 'O':
+                if len(tlist) == 1:
+                    continue
+                tlist_all.append(tlist)
+                tlist = []
+
+        tlist_last = []
+        ti = 0
+        while ti < len(tlist_all):
+
+            if len(tlist_all[ti]) <= 70:
+                tk = ti + 1
+                lens = len(tlist_all[ti])
+                tmplist = tlist_all[ti]
+                while tk < len(tlist_all):
+
+                    lens += len(tlist_all[tk])
+                    if lens <= 70:
+                        # print('---'+str(tmplist[-1:][0])+'---')
+                        if tmplist[-1:][0] == ('。' + '\t' + 'O' + '\n'):
+                            tlist_last.append(tmplist)
+                            ti = tk
+                            print('........3.....', ti)
+                            break
+                        else:
+                            tmplist += tlist_all[tk]
+                            tk += 1
+                    else:
+                        tlist_last.append(tmplist)
+                        ti = tk
+
+                        break
+
+                if tk == len(tlist_all):
+                    tlist_last.append(tmplist)
+                    ti = tk
 
 
-    print(count)
-    lists = sorted(dictlen.items(), key=operator.itemgetter(0), reverse=False)
-    amount = 0
-    for d in lists:
-        print(d)
-        amount += d[1]
-        print(amount, amount/7750)
+                # if ti+1 < len(tlist_all) and (len(tlist_all[ti]) + len(tlist_all[ti+1])) <= 70:
+                #     if ti+2 < len(tlist_all) and \
+                #        (len(tlist_all[ti]) + len(tlist_all[ti+1]) + len(tlist_all[ti+2])) <= 70:
+                #         tlist_last.append(tlist_all[ti] + tlist_all[ti+1] + tlist_all[ti+2])
+                #         ti = ti + 3
+                #     else:
+                #         tlist_last.append(tlist_all[ti] + tlist_all[ti + 1])
+                #         ti = ti + 2
+                # else:
+                #     tlist_last.append(tlist_all[ti])
+                #     ti = ti + 1
+            else:
+                ti = ti + 1
+
+        for last in tlist_last:
+            for line in last:
+                fw.write(line)
+            fw.write('\n')
+    #             count += 1
+    #             if sublens in dictlen.keys():
+    #                 dictlen[sublens] += 1
+    #             else:
+    #                 dictlen[sublens] = 1
+    #             if sublens >35 :
+    #                 print(originalText[ci-1] + '\t' + taglist[ci-1])
+    #             sublens = 0
+    #
+    #
+    #
+    # print(count)
+    # lists = sorted(dictlen.items(), key=operator.itemgetter(0), reverse=False)
+    # amount = 0
+    # for d in lists:
+    #     print(d)
+    #     amount += d[1]
+    #     print(amount, amount/count)
 
     fr.close()
     # fw.close()
@@ -131,7 +191,6 @@ if __name__ == '__main__':
 
     # calcute_length_of_entity()
     trainset_json2conll()
-
 
     # [('影像检查', 969), ('手术', 1029), ('实验室检验', 1195), ('药物', 1822), ('疾病和诊断', 4212), ('解剖部位', 8426)]
     '''

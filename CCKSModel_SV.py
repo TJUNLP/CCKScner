@@ -459,7 +459,7 @@ if __name__ == "__main__":
     resultdir = "./data/result/"
 
 
-    trainfile = './data/subtask1_training_all.conll.2.txt'
+    trainfile = './data/subtask1_training_all.conll.4.txt'
     testfile = ''
     char2v_file = "./data/preEmbedding/CCKS2019_onlychar_Char2Vec.txt"
     # char2v_file = "./data/preEmbedding/CCKS2019_DoubleEmd_Char2Vec.txt"
@@ -468,11 +468,11 @@ if __name__ == "__main__":
     # base_datafile = './model/cckscner.base.data.pkl'
     # dataname = 'cckscner.user.data.onlyc2v'
 
-    base_datafile = './model/model_data/cckscner.base.data.longlength.pkl'
-    dataname = 'cckscner.user.data.SensitiV.longlength'
+    base_datafile = './model/model_data/cckscner.base.data.pkl'
+    dataname = 'cckscner.user.data.SensitiV'
 
     user_datafile = "./model/model_data/" + dataname + ".pkl"
-    batch_size = 1
+    batch_size = 20
 
     data_split = 1
 
