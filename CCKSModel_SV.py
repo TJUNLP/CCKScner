@@ -23,10 +23,10 @@ from keras import regularizers
 # from keras.losses import my_cross_entropy_withWeight
 
 
-def test_model(nn_model, inputs_test_x, test_y, index2word, resultfile ='', batch_size=10):
+def test_model(nn_model, inputs_test_x, test_y, index2word, resultfile ='', batch_size=32):
     index2word[0] = ''
 
-    predictions = nn_model.predict(inputs_test_x, batch_size=1)
+    predictions = nn_model.predict(inputs_test_x, batch_size=batch_size)
     testresult = []
     for si in range(0, len(predictions)):
         sent = predictions[si]
