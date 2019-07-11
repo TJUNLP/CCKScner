@@ -470,7 +470,7 @@ if __name__ == "__main__":
     dataname = 'cckscner.user.data.SensitiV'
 
     user_datafile = "./model/model_data/" + dataname + ".pkl"
-    batch_size = 20
+    batch_size = 32
 
     data_split = 1
 
