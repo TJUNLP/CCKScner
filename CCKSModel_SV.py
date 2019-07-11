@@ -259,7 +259,7 @@ def CNN_CRF_char_attention2(charvocabsize, targetvocabsize,
 
 
     attention_self = SeqSelfAttention(attention_activation='softmax',
-                                      attention_type=SeqSelfAttention.ATTENTION_TYPE_MUL)(cnns)
+                                      attention_type=SeqSelfAttention.ATTENTION_TYPE_ADD)(cnns)
 
     representation = Dropout(0.5)(attention_self)
 
